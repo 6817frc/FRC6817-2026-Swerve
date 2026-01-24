@@ -38,7 +38,7 @@ public class RobotContainer {
 
   public final SendableChooser<Integer> autoChooser = new SendableChooser<>();
 
-  private double speedMult = 1;
+  private double speedMult = 0.75;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
@@ -77,7 +77,15 @@ public class RobotContainer {
   }
 
   private void getDriveValues() {
-    speedMult = 1 - driverController.getRightTriggerAxis() * 0.75 - driverController.getLeftTriggerAxis() * 0.2;
+    if (driverController.rightBumper().getAsBoolean()) {
+      speedMult = 1;
+    } else if (driverController.leftBumper().getAsBoolean()) {
+      speedMult = 0.25;
+    } else {
+      speedMult = 0.75;
+    }
+
+    SmartDashboard.putNumber("Speed Mult", speedMult);
 
     leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
     leftStickY = MathUtil.applyDeadband(driverController.getLeftY(), JOYSTICK_AXIS_THRESHOLD) * speedMult;

@@ -272,7 +272,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 	private void updateVisionMeasurement() {
 		mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-front");
 		boolean doRejectUpdate = false;
-		if (mt1 == null) return;
+		if (mt1 == null)
+			return;
 
 		if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
 			if (mt1.rawFiducials[0].ambiguity > .7) {
@@ -338,8 +339,6 @@ public class SwerveDrivetrain extends SubsystemBase {
 		xOffset += Utils.clamp(xOffsetPID.calculate(xOffset), -0.016, 0.016);
 		yOffset += Utils.clamp(yOffsetPID.calculate(yOffset), -0.016, 0.016);
 		turnOffset += Utils.clamp(turnOffsetPID.calculate(turnOffset), -0.016, 0.016);
-
-		SmartDashboard.putNumber("X Setpoint", xOffsetPID.getSetpoint());
 
 		SmartDashboard.putNumber("X Offset", xOffset);
 		SmartDashboard.putNumber("Y Offset", yOffset);
