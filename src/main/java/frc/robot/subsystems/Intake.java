@@ -38,38 +38,54 @@ public class Intake extends SubsystemBase{
     intakeArmPID = m_intakeArm.getClosedLoopController();
     armEncoder = m_intakeArm.getAbsoluteEncoder();
 
-
     m_intakeWheels.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_intakeArm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
   }
     
+    //variables used in the functions
+    double intakeSpeed = 0.25;
+
+    //wheel variables
+    double wheelVel = 0.25;
+
+    //Arm Positions
+    double downPos = 0.3; //TODO change to real position
+    double upPos = 0; //TODO change to real position
+
 
     /* Functions for wheel movements: */
 
-    //moves wheels using joystick input
-    public void intakeFuel() {
-        //TODO add code to move fuel into the robot
-    }
-
-    public void outtakeFuel() {
-        //TODO add code to move fuel out of the robot if needed
-    }
-
+    //stops any movement of the intake wheels
     public void stopWheels() {
         m_intakeWheels.set(0);
     }
 
-    /* Functions for various arm movements: */
-
-    //moves intake arm to the down position
-    public void armDown() {
-        //TODO add code to set position for arm using .setSetpoint()
+    //moves wheels using trigger input
+    public void intakeFuel() {
+        m_intakeWheels.set(wheelVel);
     }
+
+    //moves the intake wheels the oposite direction in case of stuck fuel
+    public void outtakeFuel() {
+        //TODO add code to move fuel out of the robot if needed
+    }
+
+
+    /* Functions for various arm movements: */
 
     //moves arm to the up position for intake
     public void armUp() {
-        //TODO add code to set position for arm
+        intakeArmPID.setSetpoint(upPos, SparkMax.ControlType.kPosition);
+        stopWheels();
     }
+
+    //moves intake arm to the down position
+    public void armDown() {
+        intakeArmPID.setSetpoint(downPos, SparkMax.ControlType.kPosition);
+        intakeFuel();
+    }
+
 
     @Override
     public void periodic() {

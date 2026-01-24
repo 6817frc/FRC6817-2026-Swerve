@@ -82,12 +82,28 @@ public class RobotContainer {
     driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())); // buttons:Start - face the robot toward the tag
     driverController.start().onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
 
+    driverController.rightTrigger(0.15).onTrue(Commands.runOnce(() -> intake.armDown()));
+    driverController.rightTrigger(0.15).onFalse(Commands.runOnce(() -> intake.armUp()));
 
+
+    /*
+     * copilotController.povUp().onTrue(Commands.runOnce(() -> ));
+     * copilotController.povLeft().onTrue(Commands.runOnce(() -> ));
+     * copilotController.povRight().onTrue(Commands.runOnce(() -> ));
+     * copilotController.povDown().onTrue(Commands.runOnce(() -> )); 
+    */ 
+    
     copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
     copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
-    copilotController.a().onTrue(Commands.runOnce(() -> shooter.launch()));
-    copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
 
+    copilotController.a().onTrue(Commands.runOnce(() -> shooter.launch()));
+
+    copilotController.leftBumper().onTrue(Commands.runOnce(() -> climb.climb1()));
+    copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDown()));
+
+    //need controls to update trigger input and send to climber function
+
+    //need controls for joystick y to move hood to position
   }
 
   /* 

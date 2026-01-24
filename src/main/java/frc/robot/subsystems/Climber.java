@@ -6,7 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
-import frc.robot.utils.AbsoluteEncoder;
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -31,6 +31,9 @@ public class Climber extends SubsystemBase {
     m_climbLead = new SparkMax(Ports.CAN.Climb1Lead, MotorType.kBrushless);
     SparkMaxConfig climbLeadConfig = new SparkMaxConfig();
     climbLeadConfig.inverted(false).idleMode(IdleMode.kBrake);
+    climbLeadConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder).pid(0.3, 0, 0);
+    climbPID = m_climbLead.getClosedLoopController();
+    climbEncoder = m_climbLead.getAbsoluteEncoder();
 
     //This sets the configuration of the motor following the other climb motor
     m_climbFollow = new SparkMax(Ports.CAN.Climb1follow, MotorType.kBrushless);
@@ -41,16 +44,37 @@ public class Climber extends SubsystemBase {
     m_climbFollow.configure(climbFollowConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
+  /* Variables for climb positions and general */
+  double upPos = 0.5; //TODO change to real value
+  double downPos = 0; //TODO change to real value
+  double trigThreshold = 0.15;
+  double climbSpeed = 1; // change if it needs to be slower
+
+
   /* Functions for moving the climber to positions */
 
+  //moves the climber up to the ladder with position
+  public void climbUpPos() {
+    climbPID.setSetpoint(upPos, SparkMax.ControlType.kPosition);
+  }
+
   //moves the climber up to the first bar
-  public void climb1() {
-    //TODO add code for the climber to move to the first position
+  public void climbUp(double rightTrig) {
+    if (rightTrig > trigThreshold) {
+      m_climbLead.set(climbSpeed * rightTrig);
+    }
   }
 
   //moves the climber back down to start position
-  public void climbDown() {
-    //TODO add code for the climber to move into safe positon for start
+  public void climbDownPos() {
+    climbPID.setSetpoint(downPos, SparkMax.ControlType.kPosition);
+  }
+
+  //moves the climber back down
+  public void climbDown(double leftTrig) {
+    if (leftTrig > trigThreshold) {
+      m_climbLead.set(climbSpeed * leftTrig);
+    }
   }
 
   //stops all movement of the climber
