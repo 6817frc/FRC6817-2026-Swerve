@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase{
 
     //moves the intake wheels the oposite direction in case of stuck fuel
     public void outtakeFuel() {
-        //TODO add code to move fuel out of the robot if needed
+        m_intakeWheels.set(-wheelVel);
     }
 
 

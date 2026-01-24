@@ -41,6 +41,7 @@ public class RobotContainer {
   public final SendableChooser<Boolean> usePoseEstimateChooser = new SendableChooser<>();
 
   private double speedMult = 1;
+  private double triggerThreshold = 0.15;
 
   // Replace with CommandPS4Controller or CommandJoystick if that's what you're using
   private final CommandXboxController driverController =
@@ -82,8 +83,8 @@ public class RobotContainer {
     driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())); // buttons:Start - face the robot toward the tag
     driverController.start().onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
 
-    driverController.rightTrigger(0.15).onTrue(Commands.runOnce(() -> intake.armDown()));
-    driverController.rightTrigger(0.15).onFalse(Commands.runOnce(() -> intake.armUp()));
+    driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armDown()));
+    driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armUp()));
 
 
     /*
@@ -96,11 +97,12 @@ public class RobotContainer {
     copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
     copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
 
-    copilotController.a().onTrue(Commands.runOnce(() -> shooter.launch()));
+    copilotController.a().onTrue(Commands.runOnce(() -> shooter.shoot()));
 
-    copilotController.leftBumper().onTrue(Commands.runOnce(() -> climb.climb1()));
-    copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDown()));
+    copilotController.leftBumper().onTrue(Commands.runOnce(() -> climb.climbUpPos()));
+    copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDownPos()));
 
+    copilotController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> climb.climbDown(copilotController.getLeftTriggerAxis()))); //TODO might not continuously update trigger, so fix that
     //need controls to update trigger input and send to climber function
 
     //need controls for joystick y to move hood to position

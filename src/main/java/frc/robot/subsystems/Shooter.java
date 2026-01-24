@@ -51,16 +51,22 @@ public class Shooter extends SubsystemBase {
     m_shooterIndexer.configure(indexConfig, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
   }
 
+  /* Variables for the shooter functions */
+  double launchSpeed = 0.25; //TODO change to real value
+  double launchPos = 0.2; //TODO change to real value
+  double indexVel = 0.25; //TODO change to real value
+
+
   /* Functions for launching movements */
 
   //launched fuel based on joystick input
-  public void launch() {
-    //TODO add code for the shooter to launch fuel and score
+  public void shoot() {
+    m_shooterLaunch.set(launchSpeed);
   }
 
   //moves launcher backwards
   public void returnFuel() {
-    //TODO if needed add code for the launcher to move the other way
+    m_shooterLaunch.set(-launchSpeed);
   }  
 
   //stops all launcher movement
@@ -71,18 +77,8 @@ public class Shooter extends SubsystemBase {
   /* Functions for tilting the launch head */
 
   //moves to launch position
-  public void launchPos() {
-    //TODO add code for the position the head needs to be in to launch
-  }
-
-  //moves head upwards with joysticks
-  public void upTilt() {
-    //TODO add code for moving the head upwards
-  }
-
-  //moves head downwards with joysticks
-  public void downTilt() {
-    //TODO add code for moving the head downwards
+  public void moveToLaunchPos() {
+    tiltPID.setSetpoint(launchPos, SparkMax.ControlType.kPosition);
   }
 
   //stops the head from tilting
@@ -94,12 +90,12 @@ public class Shooter extends SubsystemBase {
 
   //moves the fuel into the shooter
   public void inIndex() {
-    //TODO add code for the fuel to move into shooter
+    m_shooterIndexer.set(indexVel);
   }
 
   //moves the fuel out of the shooter
   public void outIndex() {
-    //TODO add code to move the fuel out of the shooter if needed
+    m_shooterIndexer.set(indexVel);
   }
 
 
