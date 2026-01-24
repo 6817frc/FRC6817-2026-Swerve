@@ -23,12 +23,12 @@ public final class Constants {
   public static final class DrivetrainConstants {
 		// Driving Parameters - Note that these are not the maximum capable speeds of
 		// the robot, rather the allowed maximum speeds
-		public static final double MAX_SPEED_METERS_PER_SECOND = 4.0; //4.42; //4.8;
+		public static final double MAX_SPEED_METERS_PER_SECOND = 4.0;
 		public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = 2 * Math.PI; // radians per second
 
 		public static final double DIRECTION_SLEW_RATE = 1.2; // radians per second
-		public static final double MAGNITUDE_SLEW_RATE = 1.8; // 2.0; //1.8; // percent per second (1 = 100%)
-		public static final double ROTATIONAL_SLEW_RATE = 2.0; // 20.0; //2.0; // percent per second (1 = 100%)
+		public static final double MAGNITUDE_SLEW_RATE = 1.8; // percent per second (1 = 100%)
+		public static final double ROTATIONAL_SLEW_RATE = 2.0; // percent per second (1 = 100%)
 
 		// Chassis configuration
 		public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(21.75);
@@ -86,7 +86,7 @@ public final class Constants {
 		public static final double DRIVING_MIN_OUTPUT_NORMALIZED = -1;
 		public static final double DRIVING_MAX_OUTPUT_NORMALIZED = 1;
 
-		public static final double TURNING_P = 1.0; //1.0; // 1.0 might be a bit too much - reduce a bit if needed
+		public static final double TURNING_P = 1.0; // 1.0 might be a bit too much - reduce a bit if needed
 		public static final double TURNING_I = 0;
 		public static final double TURNING_D = 0;
 		public static final double TURNING_FF = 0;
@@ -96,12 +96,12 @@ public final class Constants {
 		public static final IdleMode DRIVING_MOTOR_IDLE_MODE = IdleMode.kBrake;
 		public static final IdleMode TURNING_MOTOR_IDLE_MODE = IdleMode.kBrake;
 
-		public static final int DRIVING_MOTOR_CURRENT_LIMIT_AMPS = 40; //50; // amps
+		public static final int DRIVING_MOTOR_CURRENT_LIMIT_AMPS = 40; // amps
 		public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // amps
 	}
 
   	public static final class AutoConstants {
-		public static final double MAX_SPEED_METERS_PER_SECOND = 3.0; //4.42; //3.0;
+		public static final double MAX_SPEED_METERS_PER_SECOND = 3.0;
 		public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
 		public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
 		public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = Math.PI;

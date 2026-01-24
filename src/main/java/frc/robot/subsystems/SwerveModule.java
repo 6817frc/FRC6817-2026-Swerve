@@ -133,7 +133,8 @@ public class SwerveModule {
 		if (Math.abs(correctedDesiredState.speedMetersPerSecond) < 0.001 // less than 1 mm per sec
 			&& Math.abs(correctedDesiredState.angle.getRadians() - turnEncoder.getPosition()) < Rotation2d.fromDegrees(1).getRadians()) // less than 1 degree
 		{
-			driveMotor.set(0); // no point in doing anything
+			// no point in doing anything
+			driveMotor.set(0); 
 			turnMotor.set(0);
 		}
 		else

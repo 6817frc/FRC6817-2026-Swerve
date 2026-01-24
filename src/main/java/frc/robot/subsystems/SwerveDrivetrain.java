@@ -65,8 +65,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 	// NOTE: it might make sense to decrease the PID controller period below 0.02 sec (which is the period used by the main loop)
 	static final double TURN_PID_CONTROLLER_PERIOD_SECONDS = .01; // 0.01 sec = 10 ms 	
 	
-	static final double MIN_TURN_PCT_OUTPUT = 0.1; // 0.1;
-	static final double MAX_TURN_PCT_OUTPUT = 0.2; // 0.4;
+	static final double MIN_TURN_PCT_OUTPUT = 0.1;
+	static final double MAX_TURN_PCT_OUTPUT = 0.2;
 	
 	static final double TURN_PROPORTIONAL_GAIN = 0.001; // 0.01;
 	static final double TURN_INTEGRAL_GAIN = 0.0;
@@ -141,13 +141,13 @@ public class SwerveDrivetrain extends SubsystemBase {
 
 	/** Creates a new Drivetrain. */
 	public SwerveDrivetrain() {
-		
-		m_frontLeft.calibrateVirtualPosition(FRONT_LEFT_VIRTUAL_OFFSET_RADIANS); // set virtual position for absolute encoder
+		// set virtual position for absolute encoder
+		m_frontLeft.calibrateVirtualPosition(FRONT_LEFT_VIRTUAL_OFFSET_RADIANS); 
 		m_frontRight.calibrateVirtualPosition(FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS);
 		m_rearLeft.calibrateVirtualPosition(REAR_LEFT_VIRTUAL_OFFSET_RADIANS);
 		m_rearRight.calibrateVirtualPosition(REAR_RIGHT_VIRTUAL_OFFSET_RADIANS);
-
-		m_frontLeft.resetEncoders(); // resets relative encoders
+		// resets relative encoders
+		m_frontLeft.resetEncoders(); 
 		m_frontRight.resetEncoders();
 		m_rearLeft.resetEncoders();
 		m_rearRight.resetEncoders();

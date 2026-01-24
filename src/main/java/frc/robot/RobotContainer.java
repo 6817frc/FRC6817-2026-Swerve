@@ -32,7 +32,7 @@ public class RobotContainer {
 
   private double speedMult = 1;
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
+  // Replace with CommandPS4Controller or CommandJoystick if that's what you're using
   private final CommandXboxController driverController =
       new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
   private final CommandXboxController copilotController = 
@@ -73,10 +73,13 @@ public class RobotContainer {
     driverController.start().onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
   }
 
+  /* 
+   * This section is used to calculate the speed multiplier and apply that as well as a deadband to the controller's joysticks
+  */
   private void getDriveValues() {
     speedMult = 1 - driverController.getRightTriggerAxis() * 0.75 - driverController.getLeftTriggerAxis() * 0.2;
 
-    leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
+    leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD) * speedMult; 
     leftStickY = MathUtil.applyDeadband(driverController.getLeftY(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
     rightStickX = MathUtil.applyDeadband(driverController.getRightX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
   }
