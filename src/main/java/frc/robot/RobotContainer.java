@@ -4,14 +4,21 @@
 
 package frc.robot;
 
-import frc.robot.subsystems.SwerveDrivetrain;
-import frc.robot.utils.Ports;
 import edu.wpi.first.math.MathUtil;
+
+import frc.robot.subsystems.SwerveDrivetrain;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Climber;
+import frc.robot.utils.Ports;
+
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
@@ -25,6 +32,9 @@ public class RobotContainer {
 	public static final double JOYSTICK_AXIS_THRESHOLD = 0.15;
 
   public final SwerveDrivetrain drivetrain = new SwerveDrivetrain();
+  public final Intake intake = new Intake();
+  public final Shooter shooter = new Shooter();
+  public final Climber climb = new Climber();
 
   public final Field2d field = new Field2d();
 
@@ -71,6 +81,13 @@ public class RobotContainer {
 
     driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())); // buttons:Start - face the robot toward the tag
     driverController.start().onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
+
+
+    copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
+    copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
+    copilotController.a().onTrue(Commands.runOnce(() -> shooter.launch()));
+    copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
+
   }
 
   /* 

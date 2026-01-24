@@ -51,7 +51,7 @@ public class Shooter extends SubsystemBase {
     m_shooterIndexer.configure(indexConfig, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
   }
 
-  /* Functions for launcher movements */
+  /* Functions for launching movements */
 
   //launched fuel based on joystick input
   public void launch() {
@@ -59,9 +59,48 @@ public class Shooter extends SubsystemBase {
   }
 
   //moves launcher backwards
-  public void unlaunch() {
+  public void returnFuel() {
     //TODO if needed add code for the launcher to move the other way
   }  
+
+  //stops all launcher movement
+  public void stopLaunch() {
+    m_shooterLaunch.set(0);
+  }
+
+  /* Functions for tilting the launch head */
+
+  //moves to launch position
+  public void launchPos() {
+    //TODO add code for the position the head needs to be in to launch
+  }
+
+  //moves head upwards with joysticks
+  public void upTilt() {
+    //TODO add code for moving the head upwards
+  }
+
+  //moves head downwards with joysticks
+  public void downTilt() {
+    //TODO add code for moving the head downwards
+  }
+
+  //stops the head from tilting
+  public void stopTilt() {
+    m_shooterTilt.set(0);
+  }
+
+  /* Functions for the indexer to move */
+
+  //moves the fuel into the shooter
+  public void inIndex() {
+    //TODO add code for the fuel to move into shooter
+  }
+
+  //moves the fuel out of the shooter
+  public void outIndex() {
+    //TODO add code to move the fuel out of the shooter if needed
+  }
 
 
   @Override
