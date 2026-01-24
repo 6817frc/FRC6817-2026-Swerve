@@ -24,6 +24,14 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+	public static final class FieldConstants {
+		// All units are meters unless otherwise specified
+		public static final double FIELD_LENGTH = 16.54;
+		public static final double FIELD_WIDTH = 8.07;
+
+		// Center of the red hub: (11.91, 4.03)
+	}
+
 	public static final class DrivetrainConstants {
 		// Driving Parameters - Note that these are not the maximum capable speeds of
 		// the robot, rather the allowed maximum speeds

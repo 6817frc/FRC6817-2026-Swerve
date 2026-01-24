@@ -20,7 +20,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.WPIUtilJNI;
@@ -34,6 +33,7 @@ import com.studica.frc.AHRS.NavXComType;
 
 import frc.robot.Constants;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.Ports;
 import frc.robot.utils.SwerveUtils;
@@ -64,9 +64,6 @@ public class SwerveDrivetrain extends SubsystemBase {
 
 	public static final int GYRO_ORIENTATION = -1; // might be able to merge with kGyroReversed
 	public static final int GYRO_OFFSET = 90;
-
-	public static final double FIELD_LENGTH_INCHES = 54 * 12 + 1; // 54ft 1in
-	public static final double FIELD_WIDTH_INCHES = 26 * 12 + 7; // 26ft 7in
 
 	// turn settings
 	// NOTE: it might make sense to decrease the PID controller period below 0.02
@@ -128,7 +125,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 			.publish();
 
 	// Ideal position for goToL2Position
-	Pose2d idealPose;
+	public Pose2d idealPose;
 
 	// other variables
 	private boolean isTurning; // indicates that the drivetrain is turning using the PID controller hereunder
@@ -172,8 +169,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 		// points away from your alliance’s driver station wall,
 		// and the positive y-axis is perpendicular and to the left of the positive
 		// x-axis.
-		Translation2d initialTranslation = new Translation2d(Units.inchesToMeters(FIELD_LENGTH_INCHES / 2),
-				Units.inchesToMeters(FIELD_WIDTH_INCHES / 2)); // mid field
+		Translation2d initialTranslation = new Translation2d(FieldConstants.FIELD_LENGTH / 2,
+				FieldConstants.FIELD_WIDTH / 2); // mid field
 		Rotation2d initialRotation = new Rotation2d();
 		Pose2d initialPose = new Pose2d(initialTranslation, initialRotation);
 

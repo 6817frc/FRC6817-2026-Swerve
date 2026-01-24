@@ -11,6 +11,8 @@ import frc.robot.Constants.AutoConstants;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -64,16 +66,22 @@ public class RobotContainer {
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX);
     }, drivetrain));
 
-    driverController.x().onTrue(Commands.runOnce(() -> drivetrain.setL2Pose())); // button:X - Set the pose based on the
-                                                                                 // tag
-    driverController.x().whileTrue(Commands.run(() -> drivetrain.goToIdealPose())); // Go to the pose
-    driverController.x().onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset
+    driverController.x().onTrue(Commands.runOnce(() -> drivetrain.setL2Pose())) // button:X - Set the pose based on tag
+        .whileTrue(Commands.run(() -> drivetrain.goToIdealPose())) // Go to the pose
+        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
-    driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())); // buttons:Start - face the
-                                                                                        // robot toward the tag
-    driverController.start().onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
+    driverController.povDown().onTrue(Commands.runOnce(
+        () -> drivetrain.idealPose = new Pose2d(13.292746077009944, 2.0681512294440507, Rotation2d.fromDegrees(-61))))
+        // dPad:Down - go to position:
+        // [13.292746077009944, 2.0681512294440507, -60.90582686418953]
+        .whileTrue(Commands.run(() -> drivetrain.goToIdealPose())) // Go to specified pose
+        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()));
+
+    driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())) // buttons:Start - face the
+                                                                                       // robot toward the tag
+        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
   }
 
   private void getDriveValues() {
