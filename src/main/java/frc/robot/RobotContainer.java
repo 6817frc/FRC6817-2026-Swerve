@@ -52,6 +52,7 @@ public class RobotContainer {
   private double leftStickX = 0;
   private double leftStickY = 0;
   private double rightStickX = 0;
+  private double coLeftStickY = 0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -87,12 +88,12 @@ public class RobotContainer {
     driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armUp()));
 
 
-    /*
-     * copilotController.povUp().onTrue(Commands.runOnce(() -> ));
-     * copilotController.povLeft().onTrue(Commands.runOnce(() -> ));
-     * copilotController.povRight().onTrue(Commands.runOnce(() -> ));
-     * copilotController.povDown().onTrue(Commands.runOnce(() -> )); 
-    */ 
+  
+    //copilotController.povUp().onTrue(Commands.runOnce(() -> ));
+    copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.moveToLaunchPos()));
+    //copilotController.povRight().onTrue(Commands.runOnce(() -> ));
+    //copilotController.povDown().onTrue(Commands.runOnce(() -> )); 
+    
     
     copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
     copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
@@ -103,9 +104,7 @@ public class RobotContainer {
     copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDownPos()));
 
     copilotController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> climb.climbDown(copilotController.getLeftTriggerAxis()))); //TODO might not continuously update trigger, so fix that
-    //need controls to update trigger input and send to climber function
-
-    //need controls for joystick y to move hood to position
+    copilotController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> climb.climbUp(copilotController.getRightTriggerAxis()))); //TODO might not continuously update trigger, so fix that
   }
 
   /* 
