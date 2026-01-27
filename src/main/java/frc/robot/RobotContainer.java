@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.utils.Ports;
+import frc.robot.utils.Utils;
 import frc.robot.Constants.AutoConstants;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -66,22 +67,25 @@ public class RobotContainer {
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX);
     }, drivetrain));
 
-    driverController.x().onTrue(Commands.runOnce(() -> drivetrain.setL2Pose())) // button:X - Set the pose based on tag
+    driverController.x()
+        .onTrue(Commands.runOnce(() -> drivetrain.setL2Pose())) // button:X - Set the pose based on tag
         .whileTrue(Commands.run(() -> drivetrain.goToIdealPose())) // Go to the pose
-        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset
+        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()) // Reset
+        );
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
-    driverController.povDown().onTrue(Commands.runOnce(
-        () -> drivetrain.idealPose = new Pose2d(13.292746077009944, 2.0681512294440507, Rotation2d.fromDegrees(-61))))
-        // dPad:Down - go to position:
-        // [13.292746077009944, 2.0681512294440507, -60.90582686418953]
+    driverController.povDown() // dPad:Down - go to specified position
+        .onTrue(Commands.runOnce(() -> drivetrain.idealPose = Utils
+            .redToAllianceSpecific(new Pose2d(13.293, 2.068, Rotation2d.fromDegrees(-61)))))
         .whileTrue(Commands.run(() -> drivetrain.goToIdealPose())) // Go to specified pose
-        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()));
+        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()) // Reset
+        );
 
     driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())) // buttons:Start - face the
                                                                                        // robot toward the tag
-        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
+        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()) // Reset turn offset
+        );
   }
 
   private void getDriveValues() {

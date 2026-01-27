@@ -29,7 +29,10 @@ public final class Constants {
 		public static final double FIELD_LENGTH = 16.54;
 		public static final double FIELD_WIDTH = 8.07;
 
+		public static final Translation2d FIELD_CENTER = new Translation2d(FIELD_LENGTH / 2, FIELD_WIDTH / 2);
+
 		// Center of the red hub: (11.91, 4.03)
+		public static final Translation2d RED_HUB = new Translation2d(11.91, 4.03);
 	}
 
 	public static final class DrivetrainConstants {

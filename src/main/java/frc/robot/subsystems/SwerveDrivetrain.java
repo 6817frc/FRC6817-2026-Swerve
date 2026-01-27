@@ -169,8 +169,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 		// points away from your alliance’s driver station wall,
 		// and the positive y-axis is perpendicular and to the left of the positive
 		// x-axis.
-		Translation2d initialTranslation = new Translation2d(FieldConstants.FIELD_LENGTH / 2,
-				FieldConstants.FIELD_WIDTH / 2); // mid field
+		Translation2d initialTranslation = FieldConstants.FIELD_CENTER;
 		Rotation2d initialRotation = new Rotation2d();
 		Pose2d initialPose = new Pose2d(initialTranslation, initialRotation);
 
@@ -471,6 +470,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 		xOffsetPID.setSetpoint(Utils.clamp(0.4 * poseDifference.getX(), -0.4, 0.4));
 		yOffsetPID.setSetpoint(Utils.clamp(0.4 * poseDifference.getY(), -0.4, 0.4));
 		turnOffsetPID.setSetpoint(Utils.clamp(0.005 * poseDifference.getRotation().getDegrees(), -0.4, 0.4));
+		SmartDashboard.putString("Ideal Pose", idealPose.toString());
 	}
 
 	public void resetOffsets() {
