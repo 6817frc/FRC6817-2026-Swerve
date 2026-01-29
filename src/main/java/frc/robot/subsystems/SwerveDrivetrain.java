@@ -461,16 +461,19 @@ public class SwerveDrivetrain extends SubsystemBase {
 			System.out.println("Ideal Pose is null");
 			return;
 		}
+		SmartDashboard.putString("Ideal Pose", idealPose.toString());
 		Pose2d currentPose = getPose();
 		Pose2d poseDifference = new Pose2d(
 				idealPose.getX() - currentPose.getX(),
 				idealPose.getY() - currentPose.getY(),
 				Rotation2d.fromDegrees(Utils
 						.convertTo180(idealPose.getRotation().getDegrees() - currentPose.getRotation().getDegrees())));
-		xOffsetPID.setSetpoint(Utils.clamp(0.4 * poseDifference.getX(), -0.4, 0.4));
-		yOffsetPID.setSetpoint(Utils.clamp(0.4 * poseDifference.getY(), -0.4, 0.4));
-		turnOffsetPID.setSetpoint(Utils.clamp(0.005 * poseDifference.getRotation().getDegrees(), -0.4, 0.4));
-		SmartDashboard.putString("Ideal Pose", idealPose.toString());
+		
+		driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(
+				Utils.clamp(0.4 * poseDifference.getX(), -0.1, 0.1),
+				Utils.clamp(0.4 * poseDifference.getY(), -0.1, 0.1),
+				Utils.clamp(0.001 * poseDifference.getRotation().getDegrees(), -0.4, 0.4),
+				currentPose.getRotation()));
 	}
 
 	public void resetOffsets() {

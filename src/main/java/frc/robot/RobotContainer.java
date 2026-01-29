@@ -14,6 +14,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -43,6 +44,8 @@ public class RobotContainer {
 
   private double speedMult = 0.75;
 
+  private boolean useAutoDrive = false;
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
   private final CommandXboxController copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
@@ -64,23 +67,44 @@ public class RobotContainer {
   private void configureBindings() {
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       getDriveValues();
-      drivetrain.drive(-leftStickX, leftStickY, -rightStickX);
+      if (useAutoDrive) {
+        drivetrain.goToIdealPose();
+      } else {
+        // this.driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(
+        // Utils.clamp(0.4 * -poseDifference.getX(), -0.1, 0.1),
+        // Utils.clamp(0.4 * -poseDifference.getY(), -0.1, 0.1),
+        // Utils.clamp(0.001 * -poseDifference.getRotation().getDegrees(), -0.4, 0.4),
+        // Rotation2d.fromDegrees(GYRO_ORIENTATION * m_gyro.getAngle())))
+
+        drivetrain.drive(-leftStickX, leftStickY, -rightStickX);
+
+        // drivetrain.driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(-leftStickX,
+        // leftStickY, -rightStickX,
+        // Rotation2d.fromDegrees(-drivetrain.m_gyro.getAngle())));
+      }
     }, drivetrain));
 
-    driverController.x()
-        .onTrue(Commands.runOnce(() -> drivetrain.setL2Pose())) // button:X - Set the pose based on tag
-        .whileTrue(Commands.run(() -> drivetrain.goToIdealPose())) // Go to the pose
-        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()) // Reset
-        );
+    driverController.x() // button:X - Set the pose based on tag
+        .onTrue(Commands.runOnce(() -> {
+          drivetrain.setL2Pose();
+          useAutoDrive = true;
+        }))
+        .onFalse(Commands.runOnce(() -> {
+          drivetrain.resetOffsets();
+          useAutoDrive = false;
+        }));
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
     driverController.povDown() // dPad:Down - go to specified position
-        .onTrue(Commands.runOnce(() -> drivetrain.idealPose = Utils
-            .redToAllianceSpecific(new Pose2d(13.293, 2.068, Rotation2d.fromDegrees(-61)))))
-        .whileTrue(Commands.run(() -> drivetrain.goToIdealPose())) // Go to specified pose
-        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()) // Reset
-        );
+        .onTrue(Commands.runOnce(() -> {
+          drivetrain.idealPose = Utils.redToAllianceSpecific(new Pose2d(13.293, 2.068, Rotation2d.fromDegrees(-61)));
+          useAutoDrive = true;
+        }))
+        .onFalse(Commands.runOnce(() -> {
+          drivetrain.resetOffsets();
+          useAutoDrive = false;
+        }));
 
     driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())) // buttons:Start - face the
                                                                                        // robot toward the tag
