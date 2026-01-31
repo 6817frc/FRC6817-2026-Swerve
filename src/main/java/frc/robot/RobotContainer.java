@@ -6,7 +6,6 @@ package frc.robot;
 
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.utils.Ports;
-import frc.robot.utils.Utils;
 import frc.robot.Constants.AutoConstants;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -14,7 +13,6 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -68,19 +66,10 @@ public class RobotContainer {
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       getDriveValues();
       if (useAutoDrive) {
-        drivetrain.goToIdealPose();
+        // drivetrain.goToIdealPose();
+        drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, true);
       } else {
-        // this.driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(
-        // Utils.clamp(0.4 * -poseDifference.getX(), -0.1, 0.1),
-        // Utils.clamp(0.4 * -poseDifference.getY(), -0.1, 0.1),
-        // Utils.clamp(0.001 * -poseDifference.getRotation().getDegrees(), -0.4, 0.4),
-        // Rotation2d.fromDegrees(GYRO_ORIENTATION * m_gyro.getAngle())))
-
         drivetrain.drive(-leftStickX, leftStickY, -rightStickX);
-
-        // drivetrain.driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(-leftStickX,
-        // leftStickY, -rightStickX,
-        // Rotation2d.fromDegrees(-drivetrain.m_gyro.getAngle())));
       }
     }, drivetrain));
 
@@ -98,7 +87,7 @@ public class RobotContainer {
 
     driverController.povDown() // dPad:Down - go to specified position
         .onTrue(Commands.runOnce(() -> {
-          drivetrain.idealPose = Utils.redToAllianceSpecific(new Pose2d(13.293, 2.068, Rotation2d.fromDegrees(-61)));
+          drivetrain.setIdealPose(new Pose2d(13.449, 2.009, Rotation2d.fromDegrees(-61)), true);
           useAutoDrive = true;
         }))
         .onFalse(Commands.runOnce(() -> {

@@ -125,7 +125,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 			.publish();
 
 	// Ideal position for goToL2Position
-	public Pose2d idealPose;
+	public Pose2d idealPose = new Pose2d();
 
 	// other variables
 	private boolean isTurning; // indicates that the drivetrain is turning using the PID controller hereunder
@@ -141,9 +141,9 @@ public class SwerveDrivetrain extends SubsystemBase {
 	private double yOffset;
 	private double turnOffset;
 
-	private PIDController xOffsetPID = new PIDController(1, 0, 0);
-	private PIDController yOffsetPID = new PIDController(1, 0, 0);
-	private PIDController turnOffsetPID = new PIDController(1, 0, 0);
+	private PIDController xOffsetPID = new PIDController(4, 0, 0);
+	private PIDController yOffsetPID = new PIDController(4, 0, 0);
+	private PIDController turnOffsetPID = new PIDController(4.8, 0, 0);
 
 	/** Creates a new Drivetrain. */
 	public SwerveDrivetrain() {
@@ -187,9 +187,11 @@ public class SwerveDrivetrain extends SubsystemBase {
 				VecBuilder.fill(0.5, 0.5, 0.5) // how much to trust the camera (lower values = trust camera more)
 		);
 
-		xOffsetPID.setTolerance(0.01);
-		yOffsetPID.setTolerance(0.01);
+		xOffsetPID.setTolerance(0.05);
+		yOffsetPID.setTolerance(0.05);
 		turnOffsetPID.setTolerance(0.01);
+
+		turnOffsetPID.enableContinuousInput(-3.14, 3.14);
 
 		// creates a PID controller
 		turnPidController = new PIDController(TURN_PROPORTIONAL_GAIN, TURN_INTEGRAL_GAIN, TURN_DERIVATIVE_GAIN);
@@ -331,19 +333,10 @@ public class SwerveDrivetrain extends SubsystemBase {
 	 *                      field.
 	 * @param rateLimit     Whether to enable rate limiting for smoother control.
 	 */
-	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
-		xOffset += Utils.clamp(xOffsetPID.calculate(xOffset), -0.016, 0.016);
-		yOffset += Utils.clamp(yOffsetPID.calculate(yOffset), -0.016, 0.016);
-		turnOffset += Utils.clamp(turnOffsetPID.calculate(turnOffset), -0.016, 0.016);
+	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit,
+			boolean autoMove) {
 
-		SmartDashboard.putNumber("X Offset", xOffset);
-		SmartDashboard.putNumber("Y Offset", yOffset);
-		SmartDashboard.putNumber("Turn Offset", turnOffset);
-
-		xSpeed += xOffset;
-		ySpeed += yOffset;
-		rot += turnOffset;
-
+		SmartDashboard.putString("Ideal Pose", idealPose.toString());
 		double xSpeedCommanded;
 		double ySpeedCommanded;
 
@@ -397,16 +390,43 @@ public class SwerveDrivetrain extends SubsystemBase {
 			m_currentRotation = rot;
 		}
 
+		Pose2d currentPose = getPose();
+
+		SmartDashboard.putBooleanArray("Is At Error", new boolean[] {
+				xOffsetPID.atSetpoint(),
+				yOffsetPID.atSetpoint(),
+				turnOffsetPID.atSetpoint()
+		});
+
+		SmartDashboard.putNumber("Turn Error", turnOffsetPID.getError());
+
+		xOffset = xOffsetPID.calculate(currentPose.getX());
+		yOffset = yOffsetPID.calculate(currentPose.getY());
+		turnOffset = turnOffsetPID.calculate(currentPose.getRotation().getRadians());
+
+		xOffset = Utils.clamp(xOffset, -2, 2);
+		yOffset = Utils.clamp(yOffset, -2, 2);
+		turnOffset = Utils.clamp(turnOffset, -4, 4);
+
+		SmartDashboard.putNumber("X Offset", xOffset);
+		SmartDashboard.putNumber("Y Offset", yOffset);
+		SmartDashboard.putNumber("Turn Offset", turnOffset);
+
 		// Convert the commanded speeds into the correct units for the drivetrain
 		double xSpeedDelivered = xSpeedCommanded * DrivetrainConstants.MAX_SPEED_METERS_PER_SECOND;
 		double ySpeedDelivered = ySpeedCommanded * DrivetrainConstants.MAX_SPEED_METERS_PER_SECOND;
 		double rotDelivered = m_currentRotation * DrivetrainConstants.MAX_ANGULAR_SPEED_RADIANS_PER_SECOND;
 
-		var swerveModuleStates = DrivetrainConstants.DRIVE_KINEMATICS.toSwerveModuleStates(
-				fieldRelative
-						? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
-								Rotation2d.fromDegrees(GYRO_ORIENTATION * m_gyro.getAngle()))
-						: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
+		ChassisSpeeds speeds = fieldRelative
+				? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
+						Rotation2d.fromDegrees(GYRO_ORIENTATION * m_gyro.getAngle()))
+				: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
+
+		if (autoMove)
+			speeds = speeds.plus(
+					ChassisSpeeds.fromFieldRelativeSpeeds(xOffset, yOffset, turnOffset, currentPose.getRotation()));
+
+		var swerveModuleStates = DrivetrainConstants.DRIVE_KINEMATICS.toSwerveModuleStates(speeds);
 
 		SwerveDriveKinematics.desaturateWheelSpeeds(
 				swerveModuleStates, DrivetrainConstants.MAX_SPEED_METERS_PER_SECOND);
@@ -418,11 +438,12 @@ public class SwerveDrivetrain extends SubsystemBase {
 	}
 
 	public void drive(double xSpeed, double ySpeed, double angularSpeed) {
-		this.drive(xSpeed, ySpeed, angularSpeed, true, false);
+		this.drive(xSpeed, ySpeed, angularSpeed, true, false, false);
 	}
 
 	public void driveRobotRelative(ChassisSpeeds speeds) {
-		this.drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false, true);
+		this.drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false, true,
+				false);
 	}
 
 	// Face toward the center of the tag (any tag)
@@ -454,6 +475,18 @@ public class SwerveDrivetrain extends SubsystemBase {
 				// Ideal pose: [16.016096044988895, 2.572107402482555, -100.88675058580691]
 				break;
 		}
+
+		xOffsetPID.setSetpoint(idealPose.getX());
+		yOffsetPID.setSetpoint(idealPose.getY());
+		turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
+	}
+
+	public void setIdealPose(Pose2d pose, boolean flipForBlue) {
+		idealPose = flipForBlue ? Utils.redToAllianceSpecific(pose) : pose;
+
+		xOffsetPID.setSetpoint(idealPose.getX());
+		yOffsetPID.setSetpoint(idealPose.getY());
+		turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
 	}
 
 	public void goToIdealPose() {
@@ -468,21 +501,22 @@ public class SwerveDrivetrain extends SubsystemBase {
 				idealPose.getY() - currentPose.getY(),
 				Rotation2d.fromDegrees(Utils
 						.convertTo180(idealPose.getRotation().getDegrees() - currentPose.getRotation().getDegrees())));
-		
-		driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(
-				Utils.clamp(0.4 * poseDifference.getX(), -0.1, 0.1),
-				Utils.clamp(0.4 * poseDifference.getY(), -0.1, 0.1),
-				Utils.clamp(0.001 * poseDifference.getRotation().getDegrees(), -0.4, 0.4),
-				currentPose.getRotation()));
+
+		ChassisSpeeds chassisSpeedsOffset = ChassisSpeeds.fromFieldRelativeSpeeds(
+				poseDifference.getX(),
+				poseDifference.getY(),
+				poseDifference.getRotation().getRadians(),
+				currentPose.getRotation());
+
+		// xOffsetPID.setSetpoint(chassisSpeedsOffset.vxMetersPerSecond);
+		// yOffsetPID.setSetpoint(chassisSpeedsOffset.vyMetersPerSecond);
+		// turnOffsetPID.setSetpoint(chassisSpeedsOffset.omegaRadiansPerSecond);
 	}
 
 	public void resetOffsets() {
-		xOffset = 0;
-		yOffset = 0;
-		turnOffset = 0;
-		xOffsetPID.setSetpoint(0);
-		yOffsetPID.setSetpoint(0);
-		turnOffsetPID.setSetpoint(0);
+		// xOffsetPID.setSetpoint(0);
+		// yOffsetPID.setSetpoint(0);
+		// turnOffsetPID.setSetpoint(0);
 	}
 
 	/**
@@ -568,7 +602,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 	}
 
 	public void stop() {
-		drive(0, 0, 0, false, false);
+		drive(0, 0, 0, false, false, false);
 
 		isTurning = false;
 	}
@@ -695,7 +729,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
 		// System.out.println("output: " + output);
 
-		drive(0, 0, output, false, false);
+		drive(0, 0, output, false, false, false);
 	}
 
 }
