@@ -107,6 +107,9 @@ public class Robot extends TimedRobot {
   @Override
   public void simulationPeriodic() {}
 
+  /*
+   * This is where all the information posted to Smart Dashboard will be, so any imput the drivers will need should be here
+   */
   public void updateSmartDash() {
     SmartDashboard.putNumber("Front Left Turning Absolute Encoder Position", m_robotContainer.getDriveTrain().getFrontLeftModule().getTurningAbsoluteEncoder().getPosition());
 		SmartDashboard.putNumber("Rear Left Turning Absolute Encoder Position", m_robotContainer.getDriveTrain().getRearLeftModule().getTurningAbsoluteEncoder().getPosition());

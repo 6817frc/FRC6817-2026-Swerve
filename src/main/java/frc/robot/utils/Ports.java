@@ -32,9 +32,9 @@ public class Ports {
 			// 2025 Season SPARK MAX Absolute encoders
 			
 			public static final int FRONT_RIGHT_TURNING_ABSOLUTE_ENCODER = 1;
-			public static final int REAR_RIGHT_TURNING_ABSOLUTE_ENCODER = 0;
-			public static final int REAR_LEFT_TURNING_ABSOLUTE_ENCODER = 2;
-			public static final int FRONT_LEFT_TURNING_ABSOLUTE_ENCODER = 3;			
+			public static final int REAR_RIGHT_TURNING_ABSOLUTE_ENCODER =  0;
+			public static final int REAR_LEFT_TURNING_ABSOLUTE_ENCODER =   2;
+			public static final int FRONT_LEFT_TURNING_ABSOLUTE_ENCODER =  3;			
 		}
 		
 		/**
@@ -54,22 +54,23 @@ public class Ports {
 			public static final int PDP = 0;	
 
 			// SPARK MAX CAN IDs
-			public static final int FRONT_LEFT_DRIVING = 7;
-			public static final int REAR_LEFT_DRIVING = 5;
+			public static final int FRONT_LEFT_DRIVING =  7;
+			public static final int REAR_LEFT_DRIVING =   5;
 			public static final int FRONT_RIGHT_DRIVING = 3;
-			public static final int REAR_RIGHT_DRIVING = 1;
+			public static final int REAR_RIGHT_DRIVING =  1;
 
-			public static final int FRONT_LEFT_TURNING = 8;
-			public static final int REAR_LEFT_TURNING = 6;
+			public static final int FRONT_LEFT_TURNING =  8;
+			public static final int REAR_LEFT_TURNING =   6;
 			public static final int FRONT_RIGHT_TURNING = 4;
-			public static final int REAR_RIGHT_TURNING = 2;
+			public static final int REAR_RIGHT_TURNING =  2;
 
-			public static final int IntakeWheels = 9;
-			public static final int Wrist = 10;
-			public static final int ArmLead = 11;
-			public static final int ArmFollower = 12;
-			public static final int Climb = 13;
-
+			public static final int intakeWheels =   9;
+			public static final int intakeArm =     10;
+			public static final int shooterIndex = 11;
+			public static final int shooterTilt = 12;
+			public static final int shooterLauch = 13;
+			public static final int Climb1Lead = 14;
+			public static final int Climb1follow = 15;
 		}
 		
 		/**
