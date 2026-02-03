@@ -52,7 +52,6 @@ public class RobotContainer {
   private double leftStickX = 0;
   private double leftStickY = 0;
   private double rightStickX = 0;
-  private double coLeftStickY = 0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
