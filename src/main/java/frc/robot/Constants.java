@@ -126,9 +126,9 @@ public final class Constants {
 		public static final int TURNING_MOTOR_CURRENT_LIMIT_AMPS = 20; // amps
 	}
 
-  	public static final class AutoConstants {
+	public static final class AutoConstants {
 		public static final String[] AutoPaths = { "Test" };
-		
+
 		public static final double MAX_SPEED_METERS_PER_SECOND = 3.0;
 		public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
 		public static final double MAX_ANGULAR_SPEED_RADIANS_PER_SECOND = Math.PI;
@@ -139,9 +139,9 @@ public final class Constants {
 		public static final double THETA_CONTROLLER_P = 1;
 
 		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_P = 5;
-		public static final double ROTATION_HOLONOMIC_CONTROLLER_P = 1;
-
 		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_I = 0;
+
+		public static final double ROTATION_HOLONOMIC_CONTROLLER_P = 1;
 		public static final double ROTATION_HOLONOMIC_CONTROLLER_I = 0;
 
 		// Constraint for the motion profiled robot angle controller

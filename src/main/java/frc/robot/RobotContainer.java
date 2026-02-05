@@ -73,23 +73,17 @@ public class RobotContainer {
   private void configureBindings() {
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       getDriveValues();
-      if (useAutoDrive) {
-        // drivetrain.goToIdealPose();
-        drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, true);
-      } else {
-        drivetrain.drive(-leftStickX, leftStickY, -rightStickX);
-      }
+      drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive);
     }, drivetrain));
+
+    /* --------------------------- Driver Controller --------------------------- */
 
     driverController.x() // button:X - Set the pose based on tag
         .onTrue(Commands.runOnce(() -> {
           drivetrain.setL2Pose();
           useAutoDrive = true;
         }))
-        .onFalse(Commands.runOnce(() -> {
-          drivetrain.resetOffsets();
-          useAutoDrive = false;
-        }));
+        .onFalse(Commands.runOnce(() -> useAutoDrive = false));
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
@@ -98,29 +92,21 @@ public class RobotContainer {
           drivetrain.setIdealPose(new Pose2d(13.449, 2.009, Rotation2d.fromDegrees(-61)), true);
           useAutoDrive = true;
         }))
-        .onFalse(Commands.runOnce(() -> {
-          drivetrain.resetOffsets();
-          useAutoDrive = false;
-        }));
+        .onFalse(Commands.runOnce(() -> useAutoDrive = false));
 
-    driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())) // buttons:Start - face the
-                                                                                       // robot toward the tag
-        .onFalse(Commands.runOnce(() -> drivetrain.resetOffsets()) // Reset turn offset
-        );
-    driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())); // buttons:Start - face the robot toward the tag
-    driverController.start().onFalse(Commands.runOnce(() -> drivetrain.resetOffsets())); // Reset turn offset
+    driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())); // buttons:Start - face the
+                                                                                        // robot toward the tag
 
     driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armDown()));
     driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armUp()));
 
+    /* --------------------------- Copilot Controller --------------------------- */
 
-  
-    //copilotController.povUp().onTrue(Commands.runOnce(() -> ));
+    // copilotController.povUp().onTrue(Commands.runOnce(() -> ));
     copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.moveToLaunchPos()));
-    //copilotController.povRight().onTrue(Commands.runOnce(() -> ));
-    //copilotController.povDown().onTrue(Commands.runOnce(() -> )); 
-    
-    
+    // copilotController.povRight().onTrue(Commands.runOnce(() -> ));
+    // copilotController.povDown().onTrue(Commands.runOnce(() -> ));
+
     copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
     copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
 
@@ -129,13 +115,21 @@ public class RobotContainer {
     copilotController.leftBumper().onTrue(Commands.runOnce(() -> climb.climbUpPos()));
     copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDownPos()));
 
-    copilotController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> climb.climbDown(copilotController.getLeftTriggerAxis()))); //TODO might not continuously update trigger, so fix that
-    copilotController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> climb.climbUp(copilotController.getRightTriggerAxis()))); //TODO might not continuously update trigger, so fix that
+    copilotController.leftTrigger(triggerThreshold)
+        .onTrue(Commands.runOnce(() -> climb.climbDown(copilotController.getLeftTriggerAxis()))); // TODO might not
+                                                                                                  // continuously update
+                                                                                                  // trigger, so fix
+                                                                                                  // that
+    copilotController.rightTrigger(triggerThreshold)
+        .onTrue(Commands.runOnce(() -> climb.climbUp(copilotController.getRightTriggerAxis()))); // TODO might not
+                                                                                                 // continuously update
+                                                                                                 // trigger, so fix that
   }
 
-  /* 
-   * This section is used to calculate the speed multiplier and apply that as well as a deadband to the controller's joysticks
-  */
+  /*
+   * This section is used to calculate the speed multiplier and apply that as well
+   * as a deadband to the controller's joysticks
+   */
   private void getDriveValues() {
     if (driverController.rightBumper().getAsBoolean()) {
       speedMult = 1;
@@ -147,7 +141,7 @@ public class RobotContainer {
 
     SmartDashboard.putNumber("Speed Mult", speedMult);
 
-    leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD) * speedMult; 
+    leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
     leftStickY = MathUtil.applyDeadband(driverController.getLeftY(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
     rightStickX = MathUtil.applyDeadband(driverController.getRightX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
   }

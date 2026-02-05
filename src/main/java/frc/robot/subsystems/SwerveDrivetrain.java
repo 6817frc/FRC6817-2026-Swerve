@@ -66,12 +66,13 @@ public class SwerveDrivetrain extends SubsystemBase {
 	public static final int GYRO_OFFSET = 90;
 
 	// turn settings
-	// NOTE: it might make sense to decrease the PID controller period below 0.02 sec (which is the period used by the main loop)
-	static final double TURN_PID_CONTROLLER_PERIOD_SECONDS = .01; // 0.01 sec = 10 ms 	
-	
+	// NOTE: it might make sense to decrease the PID controller period below 0.02
+	// sec (which is the period used by the main loop)
+	static final double TURN_PID_CONTROLLER_PERIOD_SECONDS = .01; // 0.01 sec = 10 ms
+
 	static final double MIN_TURN_PCT_OUTPUT = 0.1;
 	static final double MAX_TURN_PCT_OUTPUT = 0.2;
-	
+
 	static final double TURN_PROPORTIONAL_GAIN = 0.001; // 0.01;
 	static final double TURN_INTEGRAL_GAIN = 0.0;
 	static final double TURN_DERIVATIVE_GAIN = 0.0; // 0.0001
@@ -140,24 +141,22 @@ public class SwerveDrivetrain extends SubsystemBase {
 	private double yOffset;
 	private double turnOffset;
 
-	private PIDController xOffsetPID = new PIDController(4, 0, 0);
-	private PIDController yOffsetPID = new PIDController(4, 0, 0);
-	private PIDController turnOffsetPID = new PIDController(4.8, 0, 0);
+	private PIDController xOffsetPID = new PIDController(2.5, 0, 0.1);
+	private PIDController yOffsetPID = new PIDController(2.5, 0, 0.1);
+	private PIDController turnOffsetPID = new PIDController(3, 0, 0.1);
 
 	/** Creates a new Drivetrain. */
 	public SwerveDrivetrain() {
 		// set virtual position for absolute encoder
-		m_frontLeft.calibrateVirtualPosition(FRONT_LEFT_VIRTUAL_OFFSET_RADIANS); 
+		m_frontLeft.calibrateVirtualPosition(FRONT_LEFT_VIRTUAL_OFFSET_RADIANS);
 		m_frontRight.calibrateVirtualPosition(FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS);
 		m_rearLeft.calibrateVirtualPosition(REAR_LEFT_VIRTUAL_OFFSET_RADIANS);
 		m_rearRight.calibrateVirtualPosition(REAR_RIGHT_VIRTUAL_OFFSET_RADIANS);
 		// resets relative encoders
-		m_frontLeft.resetEncoders(); 
+		m_frontLeft.resetEncoders();
 		m_frontRight.resetEncoders();
 		m_rearLeft.resetEncoders();
 		m_rearRight.resetEncoders();
-
-		zeroHeading(); // resets gyro
 
 		// sets initial pose arbitrarily
 		// Note: the field coordinate system (or global coordinate system) is an
@@ -187,7 +186,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
 		xOffsetPID.setTolerance(0.05);
 		yOffsetPID.setTolerance(0.05);
-		turnOffsetPID.setTolerance(0.01);
+		turnOffsetPID.setTolerance(0.05);
 
 		turnOffsetPID.enableContinuousInput(-3.14, 3.14);
 
@@ -244,6 +243,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 				},
 				this // Reference to this subsystem to set requirements
 		);
+
+		zeroHeading(); // resets gyro
 	}
 
 	@Override
@@ -421,8 +422,11 @@ public class SwerveDrivetrain extends SubsystemBase {
 				: new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
 
 		if (autoMove)
-			speeds = speeds.plus(
-					ChassisSpeeds.fromFieldRelativeSpeeds(xOffset, yOffset, turnOffset, currentPose.getRotation()));
+			speeds = speeds.plus(ChassisSpeeds.fromFieldRelativeSpeeds(
+					xOffsetPID.atSetpoint() ? 0 : xOffset,
+					yOffsetPID.atSetpoint() ? 0 : yOffset,
+					turnOffsetPID.atSetpoint() ? 0 : turnOffset,
+					currentPose.getRotation()));
 
 		var swerveModuleStates = DrivetrainConstants.DRIVE_KINEMATICS.toSwerveModuleStates(speeds);
 
@@ -463,13 +467,17 @@ public class SwerveDrivetrain extends SubsystemBase {
 			return;
 		int id = mt1.rawFiducials[0].id;
 		switch (id) {
+			case 7:
+				idealPose = new Pose2d(13.465, 1.638, Rotation2d.fromDegrees(-90));
+				// [13.46527421071163, 1.6380132212596628, -91.04776389939921]
+				break;
 			case 5:
 			case 8:
-				idealPose = new Pose2d(13.687315108156406, 2.1035879231131234, Rotation2d.fromDegrees(-50));
+				idealPose = new Pose2d(13.687, 2.104, Rotation2d.fromDegrees(-50));
 				// [13.687315108156406, 2.1035879231131234, -49.58318706509744]
 				break;
 			case 16:
-				idealPose = new Pose2d(16.016096044988895, 2.572107402482555, Rotation2d.fromDegrees(-100));
+				idealPose = new Pose2d(16.016, 2.572, Rotation2d.fromDegrees(-100));
 				// Ideal pose: [16.016096044988895, 2.572107402482555, -100.88675058580691]
 				break;
 		}
@@ -485,36 +493,6 @@ public class SwerveDrivetrain extends SubsystemBase {
 		xOffsetPID.setSetpoint(idealPose.getX());
 		yOffsetPID.setSetpoint(idealPose.getY());
 		turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
-	}
-
-	public void goToIdealPose() {
-		if (idealPose == null) {
-			System.out.println("Ideal Pose is null");
-			return;
-		}
-		SmartDashboard.putString("Ideal Pose", idealPose.toString());
-		Pose2d currentPose = getPose();
-		Pose2d poseDifference = new Pose2d(
-				idealPose.getX() - currentPose.getX(),
-				idealPose.getY() - currentPose.getY(),
-				Rotation2d.fromDegrees(Utils
-						.convertTo180(idealPose.getRotation().getDegrees() - currentPose.getRotation().getDegrees())));
-
-		ChassisSpeeds chassisSpeedsOffset = ChassisSpeeds.fromFieldRelativeSpeeds(
-				poseDifference.getX(),
-				poseDifference.getY(),
-				poseDifference.getRotation().getRadians(),
-				currentPose.getRotation());
-
-		// xOffsetPID.setSetpoint(chassisSpeedsOffset.vxMetersPerSecond);
-		// yOffsetPID.setSetpoint(chassisSpeedsOffset.vyMetersPerSecond);
-		// turnOffsetPID.setSetpoint(chassisSpeedsOffset.omegaRadiansPerSecond);
-	}
-
-	public void resetOffsets() {
-		// xOffsetPID.setSetpoint(0);
-		// yOffsetPID.setSetpoint(0);
-		// turnOffsetPID.setSetpoint(0);
 	}
 
 	/**
