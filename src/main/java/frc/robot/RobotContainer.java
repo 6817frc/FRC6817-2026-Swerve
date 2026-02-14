@@ -111,19 +111,20 @@ public class RobotContainer {
     copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
 
     copilotController.a().onTrue(Commands.runOnce(() -> shooter.shoot()));
+    copilotController.a().onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
 
-    copilotController.leftBumper().onTrue(Commands.runOnce(() -> climb.climbUpPos()));
-    copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDownPos()));
+    // copilotController.leftBumper().onTrue(Commands.runOnce(() -> climb.climbUpPos()));
+    // copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDownPos()));
 
-    copilotController.leftTrigger(triggerThreshold)
-        .onTrue(Commands.runOnce(() -> climb.climbDown(copilotController.getLeftTriggerAxis()))); // TODO might not
-                                                                                                  // continuously update
-                                                                                                  // trigger, so fix
-                                                                                                  // that
-    copilotController.rightTrigger(triggerThreshold)
-        .onTrue(Commands.runOnce(() -> climb.climbUp(copilotController.getRightTriggerAxis()))); // TODO might not
-                                                                                                 // continuously update
-                                                                                                 // trigger, so fix that
+    // copilotController.leftTrigger(triggerThreshold)
+    //     .onTrue(Commands.runOnce(() -> climb.climbDown(copilotController.getLeftTriggerAxis()))); // TODO might not
+    //                                                                                               // continuously update
+    //                                                                                               // trigger, so fix
+    //                                                                                               // that
+    // copilotController.rightTrigger(triggerThreshold)
+    //     .onTrue(Commands.runOnce(() -> climb.climbUp(copilotController.getRightTriggerAxis()))); // TODO might not
+    //                                                                                              // continuously update
+    //                                                                                              // trigger, so fix that
   }
 
   /*

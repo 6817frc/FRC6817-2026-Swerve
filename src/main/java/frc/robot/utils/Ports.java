@@ -67,10 +67,11 @@ public class Ports {
 			public static final int intakeWheels =   9;
 			public static final int intakeArm =     10;
 			public static final int shooterIndex = 11;
-			public static final int shooterTilt = 12;
-			public static final int shooterLauch = 13;
-			public static final int Climb1Lead = 14;
-			public static final int Climb1follow = 15;
+			public static final int shooterLaunchLead = 12;
+			public static final int shooterLaunchFollow = 13;
+			public static final int shooterTilt = 14;
+			// public static final int Climb1Lead = 15;
+			// public static final int Climb1follow = 16;
 		}
 		
 		/**

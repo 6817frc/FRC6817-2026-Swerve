@@ -18,7 +18,8 @@ import frc.robot.utils.Ports;
 public class Shooter extends SubsystemBase {
   
   //These are the motors used in this subsystem
-  public final SparkMax m_shooterLaunch;
+  public final SparkMax m_shooterLaunchLead;
+  public final SparkMax m_shooterLaunchFollow;
   public final SparkMax m_shooterTilt;
   public final SparkMax m_shooterIndexer;
   public final SparkClosedLoopController tiltPID;
@@ -28,9 +29,14 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
 
     //This sets the configuration for the motor launching the fuel
-    m_shooterLaunch = new SparkMax(Ports.CAN.shooterLauch, MotorType.kBrushless);
-    SparkMaxConfig launchConfig = new SparkMaxConfig();
-    launchConfig.inverted(false).idleMode(IdleMode.kBrake);
+    m_shooterLaunchLead = new SparkMax(Ports.CAN.shooterLaunchLead, MotorType.kBrushless);
+    SparkMaxConfig launchConfigLead = new SparkMaxConfig();
+    launchConfigLead.inverted(false).idleMode(IdleMode.kBrake);
+
+    //This sets the configuration for the following motor launching the fuel
+    m_shooterLaunchFollow = new SparkMax(Ports.CAN.shooterLaunchFollow, MotorType.kBrushless);
+    SparkMaxConfig launchConfigFollow = new SparkMaxConfig();
+    launchConfigFollow.follow(m_shooterLaunchLead, true).idleMode(IdleMode.kBrake);
 
     //This sets the configuration for the motor tilting the head of the shooter
     m_shooterTilt = new SparkMax(Ports.CAN.shooterTilt, MotorType.kBrushless);
@@ -46,13 +52,14 @@ public class Shooter extends SubsystemBase {
     SparkMaxConfig indexConfig = new SparkMaxConfig();
     indexConfig.inverted(false).idleMode(IdleMode.kBrake);
 
-    m_shooterLaunch.configure(launchConfig, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
+    m_shooterLaunchLead.configure(launchConfigLead, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
+    m_shooterLaunchFollow.configure(launchConfigFollow, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
     m_shooterTilt.configure(tiltConfig, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
     m_shooterIndexer.configure(indexConfig, ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
   }
 
   /* Variables for the shooter functions */
-  double launchSpeed = 0.25; //TODO change to real value
+  double launchSpeed = 0.9; //TODO change to real value
   double launchPos = 0.2; //TODO change to real value
   double indexVel = 0.25; //TODO change to real value
 
@@ -61,17 +68,17 @@ public class Shooter extends SubsystemBase {
 
   //launched fuel based on joystick input
   public void shoot() {
-    m_shooterLaunch.set(launchSpeed);
+    m_shooterLaunchLead.set(launchSpeed);
   }
 
   //moves launcher backwards
   public void returnFuel() {
-    m_shooterLaunch.set(-launchSpeed);
+    m_shooterLaunchLead.set(-launchSpeed);
   }  
 
   //stops all launcher movement
   public void stopLaunch() {
-    m_shooterLaunch.set(0);
+    m_shooterLaunchLead.set(0);
   }
 
   /* Functions for tilting the launch head */
