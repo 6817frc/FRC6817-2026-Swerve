@@ -2,6 +2,7 @@ package frc.robot.utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.FieldConstants;
 
@@ -31,5 +32,12 @@ public class Utils {
         }
 
         return redPose.rotateAround(FieldConstants.FIELD_CENTER, Rotation2d.fromDegrees(180));
+    }
+
+    public static Rotation2d directionToPose(Pose2d fromPose, Pose2d toPose) {
+        Translation2d poseDifference = new Translation2d(
+                toPose.getX() - fromPose.getX(),
+                toPose.getY() - fromPose.getY());
+        return Rotation2d.fromRadians(Math.atan2(poseDifference.getY(), poseDifference.getX()) + Math.PI);
     }
 }

@@ -143,7 +143,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
 	private PIDController xOffsetPID = new PIDController(2.5, 0, 0.1);
 	private PIDController yOffsetPID = new PIDController(2.5, 0, 0.1);
-	private PIDController turnOffsetPID = new PIDController(3, 0, 0.1);
+	private PIDController turnOffsetPID = new PIDController(4, 0, 0.1);
 
 	/** Creates a new Drivetrain. */
 	public SwerveDrivetrain() {
@@ -331,9 +331,11 @@ public class SwerveDrivetrain extends SubsystemBase {
 	 * @param fieldRelative Whether the provided x and y speeds are relative to the
 	 *                      field.
 	 * @param rateLimit     Whether to enable rate limiting for smoother control.
+	 * @param autoMove      If enabled move to the specified x, y cords
+	 * @param autoTurn      If enabled turn to the desired degrees
 	 */
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit,
-			boolean autoMove) {
+			boolean autoMove, boolean autoTurn) {
 
 		SmartDashboard.putString("Ideal Pose", idealPose.toString());
 		double xSpeedCommanded;
@@ -425,6 +427,13 @@ public class SwerveDrivetrain extends SubsystemBase {
 			speeds = speeds.plus(ChassisSpeeds.fromFieldRelativeSpeeds(
 					xOffsetPID.atSetpoint() ? 0 : xOffset,
 					yOffsetPID.atSetpoint() ? 0 : yOffset,
+					0,
+					currentPose.getRotation()));
+
+		if (autoTurn)
+			speeds = speeds.plus(ChassisSpeeds.fromFieldRelativeSpeeds(
+					0,
+					0,
 					turnOffsetPID.atSetpoint() ? 0 : turnOffset,
 					currentPose.getRotation()));
 
@@ -440,29 +449,24 @@ public class SwerveDrivetrain extends SubsystemBase {
 	}
 
 	public void drive(double xSpeed, double ySpeed, double angularSpeed) {
-		this.drive(xSpeed, ySpeed, angularSpeed, true, false, false);
+		this.drive(xSpeed, ySpeed, angularSpeed, true, false, false, false);
 	}
 
 	public void driveRobotRelative(ChassisSpeeds speeds) {
 		this.drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false, true,
-				false);
+				false, false);
 	}
 
-	// Face toward the center of the tag (any tag)
-	public void faceTowardTag() {
-		if (mt1 == null || mt1.tagCount == 0)
-			return;
-		LimelightHelpers.RawFiducial fiducial = mt1.rawFiducials[0];
-		turnOffsetPID.setSetpoint(-1 * (fiducial.txnc * 0.0064
-				+ fiducial.distToCamera * Math.asin(fiducial.txnc * (3.14159 / 180.0)) * 0.08));
+	public void pointTowardPose() {
+
 	}
 
 	/**
-	 * Set the ideal pose for scoring on L2
+	 * Set the ideal pose based on tag
 	 * 
 	 * @param id The tag id
 	 */
-	public void setL2Pose() {
+	public void setPoseFromTag() {
 		if (mt1 == null || mt1.tagCount == 0)
 			return;
 		int id = mt1.rawFiducials[0].id;
@@ -493,6 +497,11 @@ public class SwerveDrivetrain extends SubsystemBase {
 		xOffsetPID.setSetpoint(idealPose.getX());
 		yOffsetPID.setSetpoint(idealPose.getY());
 		turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
+	}
+
+	public void setIdealRotation(Rotation2d rotation) {
+		idealPose = new Pose2d(Translation2d.kZero, rotation);
+		turnOffsetPID.setSetpoint(rotation.getRadians());
 	}
 
 	/**
@@ -578,7 +587,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 	}
 
 	public void stop() {
-		drive(0, 0, 0, false, false, false);
+		drive(0, 0, 0, false, false, false, false);
 
 		isTurning = false;
 	}
@@ -705,7 +714,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 
 		// System.out.println("output: " + output);
 
-		drive(0, 0, output, false, false, false);
+		drive(0, 0, output, false, false, false, false);
 	}
 
 }

@@ -6,7 +6,9 @@ package frc.robot;
 
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.utils.Ports;
+import frc.robot.utils.Utils;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.FieldConstants;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -51,6 +53,7 @@ public class RobotContainer {
   private double triggerThreshold = 0.15;
 
   private boolean useAutoDrive = false;
+  private boolean useAutoTurn = false;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
@@ -68,34 +71,48 @@ public class RobotContainer {
     configureBindings();
     // Add auto chooser to smartdashboard
     configureAutoChooser();
+    SmartDashboard.putNumber("Launcher Speed", 0.7);
   }
 
   private void configureBindings() {
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       getDriveValues();
-      drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive);
+      drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive, useAutoTurn);
     }, drivetrain));
 
     /* --------------------------- Driver Controller --------------------------- */
 
     driverController.x() // button:X - Set the pose based on tag
         .onTrue(Commands.runOnce(() -> {
-          drivetrain.setL2Pose();
+          drivetrain.setPoseFromTag();
           useAutoDrive = true;
+          useAutoTurn = true;
         }))
-        .onFalse(Commands.runOnce(() -> useAutoDrive = false));
+        .onFalse(Commands.runOnce(() -> {
+          useAutoDrive = false;
+          useAutoTurn = false;
+        }));
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
+
+    driverController.a()
+        .whileTrue(Commands.run(() -> {
+          drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
+              Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()))));
+          useAutoTurn = true;
+        }))
+        .onFalse(Commands.runOnce(() -> useAutoTurn = false));
 
     driverController.povDown() // dPad:Down - go to specified position
         .onTrue(Commands.runOnce(() -> {
           drivetrain.setIdealPose(new Pose2d(13.449, 2.009, Rotation2d.fromDegrees(-61)), true);
           useAutoDrive = true;
+          useAutoTurn = true;
         }))
-        .onFalse(Commands.runOnce(() -> useAutoDrive = false));
-
-    driverController.start().whileTrue(Commands.run(() -> drivetrain.faceTowardTag())); // buttons:Start - face the
-                                                                                        // robot toward the tag
+        .onFalse(Commands.runOnce(() -> {
+          useAutoDrive = false;
+          useAutoTurn = false;
+        }));
 
     driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armDown()));
     driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armUp()));
@@ -110,21 +127,25 @@ public class RobotContainer {
     copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
     copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
 
-    copilotController.a().onTrue(Commands.runOnce(() -> shooter.shoot()));
+    copilotController.a().whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0))));
     copilotController.a().onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
 
-    // copilotController.leftBumper().onTrue(Commands.runOnce(() -> climb.climbUpPos()));
-    // copilotController.rightBumper().onTrue(Commands.runOnce(() -> climb.climbDownPos()));
+    // copilotController.leftBumper().onTrue(Commands.runOnce(() ->
+    // climb.climbUpPos()));
+    // copilotController.rightBumper().onTrue(Commands.runOnce(() ->
+    // climb.climbDownPos()));
 
     // copilotController.leftTrigger(triggerThreshold)
-    //     .onTrue(Commands.runOnce(() -> climb.climbDown(copilotController.getLeftTriggerAxis()))); // TODO might not
-    //                                                                                               // continuously update
-    //                                                                                               // trigger, so fix
-    //                                                                                               // that
+    // .onTrue(Commands.runOnce(() ->
+    // climb.climbDown(copilotController.getLeftTriggerAxis()))); // TODO might not
+    // // continuously update
+    // // trigger, so fix
+    // // that
     // copilotController.rightTrigger(triggerThreshold)
-    //     .onTrue(Commands.runOnce(() -> climb.climbUp(copilotController.getRightTriggerAxis()))); // TODO might not
-    //                                                                                              // continuously update
-    //                                                                                              // trigger, so fix that
+    // .onTrue(Commands.runOnce(() ->
+    // climb.climbUp(copilotController.getRightTriggerAxis()))); // TODO might not
+    // // continuously update
+    // // trigger, so fix that
   }
 
   /*
