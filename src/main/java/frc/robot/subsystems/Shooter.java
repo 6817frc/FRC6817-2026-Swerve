@@ -31,12 +31,12 @@ public class Shooter extends SubsystemBase {
     // This sets the configuration for the motor launching the fuel
     m_shooterLaunchLead = new SparkMax(Ports.CAN.shooterLaunchLead, MotorType.kBrushless);
     SparkMaxConfig launchConfigLead = new SparkMaxConfig();
-    launchConfigLead.inverted(false).idleMode(IdleMode.kBrake);
+    launchConfigLead.inverted(false).idleMode(IdleMode.kCoast);
 
     // This sets the configuration for the following motor launching the fuel
     m_shooterLaunchFollow = new SparkMax(Ports.CAN.shooterLaunchFollow, MotorType.kBrushless);
     SparkMaxConfig launchConfigFollow = new SparkMaxConfig();
-    launchConfigFollow.follow(m_shooterLaunchLead, true).idleMode(IdleMode.kBrake);
+    launchConfigFollow.follow(m_shooterLaunchLead, true).idleMode(IdleMode.kCoast);
 
     // This sets the configuration for the motor tilting the head of the shooter
     m_shooterTilt = new SparkMax(Ports.CAN.shooterTilt, MotorType.kBrushless);
