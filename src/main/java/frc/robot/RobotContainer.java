@@ -127,8 +127,13 @@ public class RobotContainer {
     copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
     copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
 
-    copilotController.a().whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0))));
-    copilotController.a().onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
+    copilotController.a()
+        .whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0))))
+        .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
+
+    copilotController.b()
+        .whileTrue(Commands.run(() -> shooter.shoot(drivetrain.getPose())))
+        .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
 
     // copilotController.leftBumper().onTrue(Commands.runOnce(() ->
     // climb.climbUpPos()));

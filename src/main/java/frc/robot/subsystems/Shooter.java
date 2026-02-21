@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.AbsoluteEncoder;
@@ -13,7 +15,10 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.ResetMode;
+
+import frc.robot.Constants.FieldConstants;
 import frc.robot.utils.Ports;
+import frc.robot.utils.Utils;
 
 public class Shooter extends SubsystemBase {
 
@@ -69,11 +74,22 @@ public class Shooter extends SubsystemBase {
 
   /* Functions for launching movements */
 
+  /** launch fuel at specified speed (-1.0 to 1.0) */
   public void shoot(double speed) {
     m_shooterLaunchLead.set(speed);
   }
 
-  // launched fuel based on joystick input
+  /** launch fuel based on distance from hub */
+  public void shoot(Pose2d botPose) {
+    Pose2d hubPose = Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()));
+
+    double distance = Math
+        .sqrt(Math.pow(hubPose.getX() - botPose.getX(), 2) + Math.pow(hubPose.getY() - botPose.getY(), 2));
+
+    shoot(0.125 * distance + 0.5);
+  }
+
+  /** launch fuel at a predifined speed */
   public void shoot() {
     shoot(launchSpeed);
   }
@@ -83,7 +99,7 @@ public class Shooter extends SubsystemBase {
     m_shooterLaunchLead.set(-launchSpeed);
   }
 
-  // stops all launcher movement
+  /** stops all launcher movement */
   public void stopLaunch() {
     m_shooterLaunchLead.set(0);
   }

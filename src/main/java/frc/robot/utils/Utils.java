@@ -31,6 +31,7 @@ public class Utils {
             return redPose;
         }
 
+        // Flip for blue
         return redPose.rotateAround(FieldConstants.FIELD_CENTER, Rotation2d.fromDegrees(180));
     }
 
@@ -38,6 +39,6 @@ public class Utils {
         Translation2d poseDifference = new Translation2d(
                 toPose.getX() - fromPose.getX(),
                 toPose.getY() - fromPose.getY());
-        return Rotation2d.fromRadians(Math.atan2(poseDifference.getY(), poseDifference.getX()) + Math.PI);
+        return Rotation2d.fromRadians(Math.atan2(poseDifference.getY(), poseDifference.getX()) + 0);
     }
 }
