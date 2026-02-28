@@ -50,15 +50,15 @@ public class SwerveDrivetrain extends SubsystemBase {
 	// calibration: manually move wheels so it's facing straight then record the
 	// number below, deploy code then enable :)
 
-	public static final double FRONT_LEFT_VIRTUAL_OFFSET_RADIANS = -1.939; // adjust as needed so that virtual (turn)
+	public static final double FRONT_LEFT_VIRTUAL_OFFSET_RADIANS = -1.101; // adjust as needed so that virtual (turn)
 																			// position of wheel is zero when straight
-	public static final double REAR_LEFT_VIRTUAL_OFFSET_RADIANS = 1.661; // adjust as needed so that virtual (turn)
+	public static final double REAR_LEFT_VIRTUAL_OFFSET_RADIANS = -1.574; // adjust as needed so that virtual (turn)
 																			// position of wheel is zero when straight
 
-	public static final double FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS = -1.242; // invert right(+ or - pi) // adjust as
+	public static final double FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS = -1.379; // invert right(+ or - pi) // adjust as
 																			// needed so that virtual (turn) position of
 																			// wheel is zero when straight
-	public static final double REAR_RIGHT_VIRTUAL_OFFSET_RADIANS = -2.525; // invert right(+ or- pi) // adjust as needed
+	public static final double REAR_RIGHT_VIRTUAL_OFFSET_RADIANS = -2.149; // invert right(+ or- pi) // adjust as needed
 																			// so that virtual (turn) position of wheel
 																			// is zero when straight
 

@@ -54,15 +54,15 @@ public class Ports {
 			public static final int PDP = 0;	
 
 			// SPARK MAX CAN IDs
-			public static final int FRONT_LEFT_DRIVING =  7;
-			public static final int REAR_LEFT_DRIVING =   5;
-			public static final int FRONT_RIGHT_DRIVING = 3;
-			public static final int REAR_RIGHT_DRIVING =  1;
+			public static final int FRONT_LEFT_DRIVING =  36;
+			public static final int REAR_LEFT_DRIVING =   35;
+			public static final int FRONT_RIGHT_DRIVING = 38;
+			public static final int REAR_RIGHT_DRIVING =  32;
 
-			public static final int FRONT_LEFT_TURNING =  8;
-			public static final int REAR_LEFT_TURNING =   6;
-			public static final int FRONT_RIGHT_TURNING = 4;
-			public static final int REAR_RIGHT_TURNING =  2;
+			public static final int FRONT_LEFT_TURNING =  37;
+			public static final int REAR_LEFT_TURNING =   34;
+			public static final int FRONT_RIGHT_TURNING = 39;
+			public static final int REAR_RIGHT_TURNING =  33;
 
 			public static final int intakeWheels =   9;
 			public static final int intakeArm =     10;
