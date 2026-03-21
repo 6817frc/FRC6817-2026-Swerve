@@ -70,7 +70,7 @@ public class Shooter extends SubsystemBase {
   /* Variables for the shooter functions */
   double launchSpeed = 0.9; // TODO change to real value
   double launchPos = 0.2; // TODO change to real value
-  double indexVel = 0.25; // TODO change to real value
+  double indexVel = 0.75; // TODO change to real value
 
   /* Functions for launching movements */
 
@@ -120,12 +120,17 @@ public class Shooter extends SubsystemBase {
 
   // moves the fuel into the shooter
   public void inIndex() {
-    m_shooterIndexer.set(indexVel);
+    m_shooterIndexer.set(-indexVel);
   }
 
   // moves the fuel out of the shooter
   public void outIndex() {
     m_shooterIndexer.set(indexVel);
+  }
+
+  // stops indexer
+  public void stopIndex() {
+    m_shooterIndexer.set(0);
   }
 
   @Override

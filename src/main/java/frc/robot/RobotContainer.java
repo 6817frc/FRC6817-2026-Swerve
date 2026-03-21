@@ -124,8 +124,12 @@ public class RobotContainer {
     // copilotController.povRight().onTrue(Commands.runOnce(() -> ));
     // copilotController.povDown().onTrue(Commands.runOnce(() -> ));
 
-    copilotController.x().onTrue(Commands.runOnce(() -> shooter.outIndex()));
-    copilotController.y().onTrue(Commands.runOnce(() -> shooter.inIndex()));
+    copilotController.x()
+        .onTrue(Commands.runOnce(() -> shooter.outIndex()))
+        .onFalse(Commands.runOnce(() -> shooter.stopIndex()));
+    copilotController.y()
+        .onTrue(Commands.runOnce(() -> shooter.inIndex()))
+        .onFalse(Commands.runOnce(() -> shooter.stopIndex()));
 
     copilotController.a()
         .whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0))))
@@ -134,6 +138,14 @@ public class RobotContainer {
     copilotController.b()
         .whileTrue(Commands.run(() -> shooter.shoot(drivetrain.getPose())))
         .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
+
+    copilotController.rightBumper()
+        .onTrue(Commands.runOnce(() -> intake.intakeFuel()))
+        .onFalse(Commands.runOnce(() -> intake.stopWheels()));
+
+    copilotController.leftBumper()
+        .onTrue(Commands.runOnce(() -> intake.outtakeFuel()))
+        .onFalse(Commands.runOnce(() -> intake.stopWheels()));
 
   }
 
@@ -164,10 +176,6 @@ public class RobotContainer {
     }
 
     SmartDashboard.putData("Auto Choices", autoChooser);
-  }
-
-  public SwerveDrivetrain getDriveTrain() {
-    return drivetrain;
   }
 
   /**
