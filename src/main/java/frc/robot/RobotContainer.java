@@ -38,7 +38,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
  */
 public class RobotContainer {
 
-  public static final double JOYSTICK_AXIS_THRESHOLD = 0.15;
+  public static final double JOYSTICK_AXIS_THRESHOLD = 0.05;
 
   public final SwerveDrivetrain drivetrain = new SwerveDrivetrain();
   public final Intake intake = new Intake();
@@ -79,6 +79,9 @@ public class RobotContainer {
       getDriveValues();
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive, useAutoTurn);
     }, drivetrain));
+    shooter.setDefaultCommand(new RunCommand(() -> {
+      shooter.moveHood(MathUtil.applyDeadband(copilotController.getLeftY(), JOYSTICK_AXIS_THRESHOLD));
+    }, shooter));
 
     /* --------------------------- Driver Controller --------------------------- */
 
@@ -95,6 +98,7 @@ public class RobotContainer {
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
+    // Point toward the center of the hub
     driverController.a()
         .whileTrue(Commands.run(() -> {
           drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
@@ -149,7 +153,7 @@ public class RobotContainer {
 
   }
 
-  /*
+  /**
    * This section is used to calculate the speed multiplier and apply that as well
    * as a deadband to the controller's joysticks
    */

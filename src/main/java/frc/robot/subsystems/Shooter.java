@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
@@ -48,7 +49,7 @@ public class Shooter extends SubsystemBase {
     SparkMaxConfig tiltConfig = new SparkMaxConfig();
     tiltConfig.inverted(false).idleMode(IdleMode.kBrake);
     tiltConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .pid(.3, 0, 0).maxOutput(.15).minOutput(-0.15);
+        .pid(0.5, 0, 0);
     tiltPID = m_shooterTilt.getClosedLoopController();
     tiltEncoder = m_shooterTilt.getAbsoluteEncoder();
 
@@ -69,7 +70,7 @@ public class Shooter extends SubsystemBase {
 
   /* Variables for the shooter functions */
   double launchSpeed = 0.9; // TODO change to real value
-  double launchPos = 0.2; // TODO change to real value
+  double launchPos = 0.7; // TODO change to real value
   double indexVel = 0.75; // TODO change to real value
 
   /* Functions for launching movements */
@@ -86,6 +87,7 @@ public class Shooter extends SubsystemBase {
     double distance = Math
         .sqrt(Math.pow(hubPose.getX() - botPose.getX(), 2) + Math.pow(hubPose.getY() - botPose.getY(), 2));
 
+    // TODO: get data to set equation
     shoot(0.125 * distance + 0.5);
   }
 
@@ -108,12 +110,26 @@ public class Shooter extends SubsystemBase {
 
   // moves to launch position
   public void moveToLaunchPos() {
-    tiltPID.setSetpoint(launchPos, SparkMax.ControlType.kPosition);
+    tiltPID.setSetpoint(launchPos, ControlType.kPosition);
+  }
+
+  /**
+   * 
+   * @param angle the angle to set the shooter to in degrees (0 is straight
+   *              forward)
+   */
+  public void setLaunchAngle(double angle) {
+    double angleDegrees = 0.01 * angle; // TODO: get data to set function
+    tiltPID.setSetpoint(angleDegrees, ControlType.kPosition);
+  }
+
+  public void moveHood(double speed) {
+    tiltPID.setSetpoint(tiltEncoder.getPosition() + speed, ControlType.kPosition);
   }
 
   // stops the head from tilting
   public void stopTilt() {
-    m_shooterTilt.set(0);
+    tiltPID.setSetpoint(tiltEncoder.getPosition(), ControlType.kPosition);
   }
 
   /* Functions for the indexer to move */

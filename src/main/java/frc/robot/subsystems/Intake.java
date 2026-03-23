@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
@@ -34,7 +35,7 @@ public class Intake extends SubsystemBase {
     SparkMaxConfig armConfig = new SparkMaxConfig();
     armConfig.inverted(false).idleMode(IdleMode.kBrake);
     armConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .pid(0.3, 0.0, 0.0).maxOutput(0.15).minOutput(-0.15);
+        .pid(1, 0.0, 0.0).maxOutput(0.15).minOutput(-0.15);
     intakeArmPID = m_intakeArm.getClosedLoopController();
     armEncoder = m_intakeArm.getAbsoluteEncoder();
 
@@ -47,11 +48,11 @@ public class Intake extends SubsystemBase {
   double intakeSpeed = 0.25;
 
   // wheel variables
-  double wheelVel = 0.50;
+  double wheelVel = 0.75;
 
   // Arm Positions
-  double downPos = 0.02; // TODO change to real position
-  double upPos = 0.28; // TODO change to real position
+  double downPos = 0.34;
+  double upPos = 0.6;
 
   /* Functions for wheel movements: */
 
@@ -74,14 +75,25 @@ public class Intake extends SubsystemBase {
 
   // moves arm to the up position for intake
   public void armUp() {
-    intakeArmPID.setSetpoint(upPos, SparkMax.ControlType.kPosition);
+    intakeArmPID.setSetpoint(upPos, ControlType.kPosition);
     stopWheels();
   }
 
   // moves intake arm to the down position
   public void armDown() {
-    intakeArmPID.setSetpoint(downPos, SparkMax.ControlType.kPosition);
+    intakeArmPID.setSetpoint(downPos, ControlType.kPosition);
     intakeFuel();
+  }
+
+  public void setArmSpeed(double speed) {
+    if (speed == 0)
+      stopArm();
+    else
+      intakeArmPID.setSetpoint(speed, ControlType.kVelocity);
+  }
+
+  public void stopArm() {
+    intakeArmPID.setSetpoint(armEncoder.getPosition(), ControlType.kPosition);
   }
 
   public double getArmPosition() {
