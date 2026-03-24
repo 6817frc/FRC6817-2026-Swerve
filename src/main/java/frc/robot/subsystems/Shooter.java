@@ -69,9 +69,9 @@ public class Shooter extends SubsystemBase {
   }
 
   /* Variables for the shooter functions */
-  double launchSpeed = 0.9; // TODO change to real value
-  double launchPos = 0.7; // TODO change to real value
-  double indexVel = 0.75; // TODO change to real value
+  double launchSpeed = 0.9; 
+  double launchPos = 0.7; 
+  double indexVel = 0.75; 
 
   /* Functions for launching movements */
 

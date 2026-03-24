@@ -45,8 +45,8 @@ public class Climber extends SubsystemBase {
   }
   
   // /* Variables for climb positions and general */
-  // double upPos = 0.5; //TODO change to real value
-  // double downPos = 0; //TODO change to real value
+  // double upPos = 0.5; 
+  // double downPos = 0; 
   // double trigThreshold = 0.15;
   // double climbSpeed = 1; // change if it needs to be slower
 
