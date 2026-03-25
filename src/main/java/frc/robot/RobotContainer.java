@@ -83,7 +83,8 @@ public class RobotContainer {
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive, useAutoTurn);
     }, drivetrain));
     // shooter.setDefaultCommand(new RunCommand(() -> {
-    //   shooter.moveHood(MathUtil.applyDeadband(copilotController.getLeftY(), JOYSTICK_AXIS_THRESHOLD));
+    // shooter.moveHood(MathUtil.applyDeadband(copilotController.getLeftY(),
+    // JOYSTICK_AXIS_THRESHOLD));
     // }, shooter));
 
     /* --------------------------- Driver Controller --------------------------- */
@@ -111,10 +112,10 @@ public class RobotContainer {
         .onFalse(Commands.runOnce(() -> useAutoTurn = false));
 
     // Go to specified position
-    driverController.povLeft() 
+    driverController.povLeft()
         .onTrue(Commands.runOnce(() -> {
           // 3 meters and 25 degrees from the red hub on the left side
-          drivetrain.setIdealPose(new Pose2d(14.6, 2.8, Rotation2d.fromDegrees(-25)), true);
+          drivetrain.setIdealPose(new Pose2d(14.63, 2.76, Rotation2d.fromDegrees(155)), true);
           useAutoDrive = true;
           useAutoTurn = true;
         }))
@@ -123,10 +124,22 @@ public class RobotContainer {
           useAutoTurn = false;
         }));
 
-    driverController.povRight() 
+    driverController.povDown()
+        .onTrue(Commands.runOnce(() -> {
+          // 3 meters striaght back from the hub
+          drivetrain.setIdealPose(new Pose2d(14.91, 4.03, Rotation2d.fromDegrees(0)), true);
+          useAutoDrive = true;
+          useAutoTurn = true;
+        }))
+        .onFalse(Commands.runOnce(() -> {
+          useAutoDrive = false;
+          useAutoTurn = false;
+        }));
+
+    driverController.povRight()
         .onTrue(Commands.runOnce(() -> {
           // 3 meters and 25 degrees from the red hub on the right side
-          drivetrain.setIdealPose(new Pose2d(14.6, 5.3, Rotation2d.fromDegrees(25)), true);
+          drivetrain.setIdealPose(new Pose2d(14.63, 5.3, Rotation2d.fromDegrees(205)), true);
           useAutoDrive = true;
           useAutoTurn = true;
         }))
@@ -142,9 +155,9 @@ public class RobotContainer {
 
     /* --------------------------- Copilot Controller --------------------------- */
 
-    copilotController.povUp().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(50)));
-    copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(65)));
-    copilotController.povRight().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(60)));
+    copilotController.povUp().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(55)));
+    copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(58)));
+    copilotController.povRight().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(62)));
     copilotController.povDown().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(65)));
 
     copilotController.x()

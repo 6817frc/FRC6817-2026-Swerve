@@ -70,9 +70,9 @@ public class Shooter extends SubsystemBase {
   }
 
   /* Variables for the shooter functions */
-  double launchSpeed = 0.72;
+  double launchSpeed = 0.67;
   double launchPos = 0.75;
-  double indexVel = 0.75;
+  double indexVel = 0.6;
 
   /* Functions for launching movements */
 
@@ -85,8 +85,8 @@ public class Shooter extends SubsystemBase {
    * launch fuel with speed in meters per second
    */
   public void shootMeterPerSecond(double speed) {
-    // 0.0969415x-0.184652
-    shoot(0.1 * speed); // Convert m/s into power
+    // 0.146725x-0.375426
+    shoot(0.14 * speed - 0.34); // Convert m/s into power
   }
 
   /** launch fuel based on distance from hub */

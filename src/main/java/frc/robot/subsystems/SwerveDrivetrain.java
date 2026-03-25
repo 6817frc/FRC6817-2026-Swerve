@@ -472,23 +472,27 @@ public class SwerveDrivetrain extends SubsystemBase {
 		int id = mt1.rawFiducials[0].id;
 		switch (id) {
 			// case 7:
-			// 	idealPose = new Pose2d(13.465, 1.638, Rotation2d.fromDegrees(-90));
-			// 	// [13.46527421071163, 1.6380132212596628, -91.04776389939921]
-			// 	break;
+			// idealPose = new Pose2d(13.465, 1.638, Rotation2d.fromDegrees(-90));
+			// // [13.46527421071163, 1.6380132212596628, -91.04776389939921]
+			// break;
 			// case 5:
 			// case 8:
-			// 	idealPose = new Pose2d(13.687, 2.104, Rotation2d.fromDegrees(-50));
-			// 	// [13.687315108156406, 2.1035879231131234, -49.58318706509744]
-			// 	break;
+			// idealPose = new Pose2d(13.687, 2.104, Rotation2d.fromDegrees(-50));
+			// // [13.687315108156406, 2.1035879231131234, -49.58318706509744]
+			// break;
 			// case 16:
-			// 	idealPose = new Pose2d(16.016, 2.572, Rotation2d.fromDegrees(-100));
-			// 	// Ideal pose: [16.016096044988895, 2.572107402482555, -100.88675058580691]
-			// 	break;
+			// idealPose = new Pose2d(16.016, 2.572, Rotation2d.fromDegrees(-100));
+			// // Ideal pose: [16.016096044988895, 2.572107402482555, -100.88675058580691]
+			// break;
+			default:
+				idealPose = null;
 		}
 
-		xOffsetPID.setSetpoint(idealPose.getX());
-		yOffsetPID.setSetpoint(idealPose.getY());
-		turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
+		if (idealPose != null) {
+			xOffsetPID.setSetpoint(idealPose.getX());
+			yOffsetPID.setSetpoint(idealPose.getY());
+			turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
+		}
 	}
 
 	public void setIdealPose(Pose2d pose, boolean flipForBlue) {
