@@ -39,8 +39,8 @@ public class Intake extends SubsystemBase {
     intakeArmPID = m_intakeArm.getClosedLoopController();
     armEncoder = m_intakeArm.getAbsoluteEncoder();
 
-    m_intakeWheels.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_intakeArm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_intakeWheels.configure(wheelConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_intakeArm.configure(armConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
   }
 

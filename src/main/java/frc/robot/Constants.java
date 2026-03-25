@@ -9,7 +9,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -46,10 +45,10 @@ public final class Constants {
 		public static final double ROTATIONAL_SLEW_RATE = 2.0; // percent per second (1 = 100%)
 
 		// Chassis configuration
-		public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(21.75);
+		public static final double TRACK_WIDTH_METERS = 0.56;
 
 		// Distance between centers of right and left wheels on robot
-		public static final double WHEEL_BASE_METERS = Units.inchesToMeters(21.75);
+		public static final double WHEEL_BASE_METERS = 0.56;
 
 		// Distance between front and back wheels on robot
 		public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(

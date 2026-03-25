@@ -123,10 +123,10 @@ public class RobotContainer {
 
     /* --------------------------- Copilot Controller --------------------------- */
 
-    // copilotController.povUp().onTrue(Commands.runOnce(() -> ));
-    copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.moveToLaunchPos()));
-    // copilotController.povRight().onTrue(Commands.runOnce(() -> ));
-    // copilotController.povDown().onTrue(Commands.runOnce(() -> ));
+    copilotController.povUp().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(45)));
+    copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(50)));
+    copilotController.povRight().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(55)));
+    copilotController.povDown().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(60)));
 
     copilotController.x()
         .onTrue(Commands.runOnce(() -> shooter.outIndex()))
@@ -135,11 +135,11 @@ public class RobotContainer {
         .onTrue(Commands.runOnce(() -> shooter.inIndex()))
         .onFalse(Commands.runOnce(() -> shooter.stopIndex()));
 
-    copilotController.a()
+    copilotController.a() // Shoot at a set speed
         .whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0))))
         .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
 
-    copilotController.b()
+    copilotController.b() // Change hood angle and launch height based on distance from hub
         .whileTrue(Commands.run(() -> shooter.shoot(drivetrain.getPose())))
         .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
 

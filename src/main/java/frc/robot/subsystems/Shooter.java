@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -49,7 +50,7 @@ public class Shooter extends SubsystemBase {
     SparkMaxConfig tiltConfig = new SparkMaxConfig();
     tiltConfig.inverted(false).idleMode(IdleMode.kBrake);
     tiltConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .pid(0.5, 0, 0);
+        .pid(3, 0, 0).maxOutput(0.5).minOutput(-0.5);
     tiltPID = m_shooterTilt.getClosedLoopController();
     tiltEncoder = m_shooterTilt.getAbsoluteEncoder();
 
@@ -58,26 +59,34 @@ public class Shooter extends SubsystemBase {
     SparkMaxConfig indexConfig = new SparkMaxConfig();
     indexConfig.inverted(false).idleMode(IdleMode.kBrake);
 
-    m_shooterLaunchLead.configure(launchConfigLead, ResetMode.kResetSafeParameters,
+    m_shooterLaunchLead.configure(launchConfigLead, ResetMode.kNoResetSafeParameters,
         com.revrobotics.PersistMode.kNoPersistParameters);
-    m_shooterLaunchFollow.configure(launchConfigFollow, ResetMode.kResetSafeParameters,
+    m_shooterLaunchFollow.configure(launchConfigFollow, ResetMode.kNoResetSafeParameters,
         com.revrobotics.PersistMode.kNoPersistParameters);
-    m_shooterTilt.configure(tiltConfig, ResetMode.kResetSafeParameters,
+    m_shooterTilt.configure(tiltConfig, ResetMode.kNoResetSafeParameters,
         com.revrobotics.PersistMode.kNoPersistParameters);
-    m_shooterIndexer.configure(indexConfig, ResetMode.kResetSafeParameters,
+    m_shooterIndexer.configure(indexConfig, ResetMode.kNoResetSafeParameters,
         com.revrobotics.PersistMode.kNoPersistParameters);
   }
 
   /* Variables for the shooter functions */
-  double launchSpeed = 0.9; // TODO change to real value
-  double launchPos = 0.7; // TODO change to real value
-  double indexVel = 0.75; // TODO change to real value
+  double launchSpeed = 0.7; // TODO change to real value
+  double launchPos = 0.6; // TODO change to real value
+  double indexVel = 0.75;
 
   /* Functions for launching movements */
 
   /** launch fuel at specified speed (-1.0 to 1.0) */
   public void shoot(double speed) {
     m_shooterLaunchLead.set(speed);
+  }
+
+  /**
+   * launch fuel with speed in meters per second
+   */
+  public void shootMeterPerSecond(double speed) {
+    // 0.0969415x-0.184652
+    shoot(0.1 * speed); // Convert m/s into power
   }
 
   /** launch fuel based on distance from hub */
@@ -87,8 +96,18 @@ public class Shooter extends SubsystemBase {
     double distance = Math
         .sqrt(Math.pow(hubPose.getX() - botPose.getX(), 2) + Math.pow(hubPose.getY() - botPose.getY(), 2));
 
-    // TODO: get data to set equation
-    shoot(0.125 * distance + 0.5);
+    // 91.14262*0.894487^{x}
+    double launchAngle = 91.14262 * Math.pow(0.894487, distance);
+
+    // 0.0535014x^{2}+0.0964986x+6.44076
+    double launchSpeed = 0.0535014 * distance * distance + 0.0964986 * distance + 6.44076;
+
+    SmartDashboard.putNumber("Distance to hub", distance);
+    SmartDashboard.putNumber("Launch Angle", launchAngle);
+    SmartDashboard.putNumber("Launch Speed", launchSpeed);
+
+    setLaunchAngle(launchAngle);
+    shootMeterPerSecond(launchSpeed);
   }
 
   /** launch fuel at a predifined speed */
@@ -119,12 +138,18 @@ public class Shooter extends SubsystemBase {
    *              forward)
    */
   public void setLaunchAngle(double angle) {
-    double angleDegrees = 0.01 * angle; // TODO: get data to set function
-    tiltPID.setSetpoint(angleDegrees, ControlType.kPosition);
+    // 0.024x-0.8
+    double position = 0.024 * angle - 0.8;
+    // position = Utils.clamp(position, 0.2, 0.75);
+    tiltPID.setSetpoint(position, ControlType.kPosition);
   }
 
   public void moveHood(double speed) {
-    tiltPID.setSetpoint(tiltEncoder.getPosition() + speed, ControlType.kPosition);
+    if (speed != 0)
+      tiltPID.setSetpoint(tiltPID.getSetpoint() + speed * 0.0000000000000000001, ControlType.kPosition);
+
+    // tiltPID.setSetpoint(Utils.clamp(tiltPID.getSetpoint(), 0.2, 0.75),
+    // ControlType.kPosition);
   }
 
   // stops the head from tilting

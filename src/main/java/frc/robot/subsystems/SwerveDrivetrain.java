@@ -276,7 +276,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 			if (mt1.rawFiducials[0].ambiguity > .7) {
 				doRejectUpdate = true;
 			}
-			if (mt1.rawFiducials[0].distToCamera > 2.5) {
+			if (mt1.rawFiducials[0].distToCamera > 5) {
 				doRejectUpdate = true;
 			}
 		}
