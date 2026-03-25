@@ -52,6 +52,7 @@ public class Intake extends SubsystemBase {
 
   // Arm Positions
   double downPos = 0.34;
+  double midPos = 0.45
   double upPos = 0.6;
 
   /* Functions for wheel movements: */
@@ -76,6 +77,11 @@ public class Intake extends SubsystemBase {
   // moves arm to the up position for intake
   public void armUp() {
     intakeArmPID.setSetpoint(upPos, ControlType.kPosition);
+    stopWheels();
+  }
+
+  public void armMid() {
+    intakeArmPID.setSetpoint(midPos, ControlType.kPosition);
     stopWheels();
   }
 

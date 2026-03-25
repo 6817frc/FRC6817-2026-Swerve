@@ -11,6 +11,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.FieldConstants;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -50,7 +51,7 @@ public class RobotContainer {
   public final SendableChooser<Integer> autoChooser = new SendableChooser<>();
 
   private double speedMult = 0.75;
-  private double triggerThreshold = 0.15;
+  private double triggerThreshold = 0.05;
 
   private boolean useAutoDrive = false;
   private boolean useAutoTurn = false;
@@ -71,6 +72,8 @@ public class RobotContainer {
     configureBindings();
     // Add auto chooser to smartdashboard
     configureAutoChooser();
+    // Configure commands for use in path planner
+    configureAutoCommands();
     SmartDashboard.putNumber("Launcher Speed", 0.7);
   }
 
@@ -79,9 +82,9 @@ public class RobotContainer {
       getDriveValues();
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive, useAutoTurn);
     }, drivetrain));
-    shooter.setDefaultCommand(new RunCommand(() -> {
-      shooter.moveHood(MathUtil.applyDeadband(copilotController.getLeftY(), JOYSTICK_AXIS_THRESHOLD));
-    }, shooter));
+    // shooter.setDefaultCommand(new RunCommand(() -> {
+    //   shooter.moveHood(MathUtil.applyDeadband(copilotController.getLeftY(), JOYSTICK_AXIS_THRESHOLD));
+    // }, shooter));
 
     /* --------------------------- Driver Controller --------------------------- */
 
@@ -107,9 +110,23 @@ public class RobotContainer {
         }))
         .onFalse(Commands.runOnce(() -> useAutoTurn = false));
 
-    driverController.povDown() // dPad:Down - go to specified position
+    // Go to specified position
+    driverController.povLeft() 
         .onTrue(Commands.runOnce(() -> {
-          drivetrain.setIdealPose(new Pose2d(13.449, 2.009, Rotation2d.fromDegrees(-61)), true);
+          // 3 meters and 25 degrees from the red hub on the left side
+          drivetrain.setIdealPose(new Pose2d(14.6, 2.8, Rotation2d.fromDegrees(-25)), true);
+          useAutoDrive = true;
+          useAutoTurn = true;
+        }))
+        .onFalse(Commands.runOnce(() -> {
+          useAutoDrive = false;
+          useAutoTurn = false;
+        }));
+
+    driverController.povRight() 
+        .onTrue(Commands.runOnce(() -> {
+          // 3 meters and 25 degrees from the red hub on the right side
+          drivetrain.setIdealPose(new Pose2d(14.6, 5.3, Rotation2d.fromDegrees(25)), true);
           useAutoDrive = true;
           useAutoTurn = true;
         }))
@@ -121,12 +138,14 @@ public class RobotContainer {
     driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armDown()));
     driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armUp()));
 
+    driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armMid()));
+
     /* --------------------------- Copilot Controller --------------------------- */
 
-    copilotController.povUp().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(45)));
-    copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(50)));
-    copilotController.povRight().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(55)));
-    copilotController.povDown().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(60)));
+    copilotController.povUp().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(50)));
+    copilotController.povLeft().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(65)));
+    copilotController.povRight().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(60)));
+    copilotController.povDown().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(65)));
 
     copilotController.x()
         .onTrue(Commands.runOnce(() -> shooter.outIndex()))
@@ -171,6 +190,15 @@ public class RobotContainer {
     leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
     leftStickY = MathUtil.applyDeadband(driverController.getLeftY(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
     rightStickX = MathUtil.applyDeadband(driverController.getRightX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
+  }
+
+  public void configureAutoCommands() {
+    NamedCommands.registerCommand("moveHoodToLaunchPos", Commands.runOnce(() -> shooter.moveToLaunchPos()));
+    NamedCommands.registerCommand("shoot", Commands.runOnce(() -> shooter.shoot()));
+    NamedCommands.registerCommand("stopShoot", Commands.runOnce(() -> shooter.stopLaunch()));
+    NamedCommands.registerCommand("autoShoot", Commands.runOnce(() -> shooter.shoot(drivetrain.getPose())));
+    NamedCommands.registerCommand("inIndex", Commands.runOnce(() -> shooter.inIndex()));
+    NamedCommands.registerCommand("stopIndex", Commands.runOnce(() -> shooter.stopIndex()));
   }
 
   private void configureAutoChooser() {

@@ -70,8 +70,8 @@ public class Shooter extends SubsystemBase {
   }
 
   /* Variables for the shooter functions */
-  double launchSpeed = 0.7; // TODO change to real value
-  double launchPos = 0.6; // TODO change to real value
+  double launchSpeed = 0.72;
+  double launchPos = 0.75;
   double indexVel = 0.75;
 
   /* Functions for launching movements */
@@ -96,11 +96,11 @@ public class Shooter extends SubsystemBase {
     double distance = Math
         .sqrt(Math.pow(hubPose.getX() - botPose.getX(), 2) + Math.pow(hubPose.getY() - botPose.getY(), 2));
 
-    // 91.14262*0.894487^{x}
-    double launchAngle = 91.14262 * Math.pow(0.894487, distance);
+    // 90.23629*x^{-0.280692}
+    double launchAngle = Math.min(90 * Math.pow(distance, -0.28), 65);
 
-    // 0.0535014x^{2}+0.0964986x+6.44076
-    double launchSpeed = 0.0535014 * distance * distance + 0.0964986 * distance + 6.44076;
+    // 0.545238x+5.57024
+    double launchSpeed = Math.max(0.54 * distance + 5.6, 6.9);
 
     SmartDashboard.putNumber("Distance to hub", distance);
     SmartDashboard.putNumber("Launch Angle", launchAngle);
@@ -140,7 +140,7 @@ public class Shooter extends SubsystemBase {
   public void setLaunchAngle(double angle) {
     // 0.024x-0.8
     double position = 0.024 * angle - 0.8;
-    // position = Utils.clamp(position, 0.2, 0.75);
+    position = Utils.clamp(position, 0.3, 0.75);
     tiltPID.setSetpoint(position, ControlType.kPosition);
   }
 
