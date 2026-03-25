@@ -126,7 +126,7 @@ public final class Constants {
 	}
 
 	public static final class AutoConstants {
-		public static final String[] AutoPaths = { "Test" };
+		public static final String[] AutoPaths = { "Shoot Left" };
 
 		public static final double MAX_SPEED_METERS_PER_SECOND = 3.0;
 		public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
