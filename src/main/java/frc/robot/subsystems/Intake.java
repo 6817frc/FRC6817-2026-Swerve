@@ -51,7 +51,7 @@ public class Intake extends SubsystemBase {
   double wheelVel = 0.75;
 
   // Arm Positions
-  double downPos = 0.34;
+  double downPos = 0.345;
   double midPos = 0.52;
   double upPos = 0.6;
 

@@ -127,7 +127,7 @@ public class RobotContainer {
     driverController.povDown()
         .onTrue(Commands.runOnce(() -> {
           // 3 meters striaght back from the hub
-          drivetrain.setIdealPose(new Pose2d(14.91, 4.03, Rotation2d.fromDegrees(0)), true);
+          drivetrain.setIdealPose(new Pose2d(14.91, 4.03, Rotation2d.fromDegrees(180)), true);
           useAutoDrive = true;
           useAutoTurn = true;
         }))
@@ -149,9 +149,9 @@ public class RobotContainer {
         }));
 
     driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armDown()));
-    driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armUp()));
+    driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armMid()));
 
-    driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armMid()));
+    driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armUp()));
 
     /* --------------------------- Copilot Controller --------------------------- */
 
@@ -168,7 +168,7 @@ public class RobotContainer {
         .onFalse(Commands.runOnce(() -> shooter.stopIndex()));
 
     copilotController.a() // Shoot at a set speed
-        .whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0))))
+        .whileTrue(Commands.run(() -> shooter.shoot()))
         .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
 
     copilotController.b() // Change hood angle and launch height based on distance from hub
@@ -211,7 +211,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("stopShoot", Commands.runOnce(() -> shooter.stopLaunch()));
     NamedCommands.registerCommand("autoShoot", Commands.runOnce(() -> shooter.shoot(drivetrain.getPose())));
     NamedCommands.registerCommand("inIndex", Commands.runOnce(() -> shooter.inIndex()));
+    NamedCommands.registerCommand("outIndex", Commands.runOnce(() -> shooter.outIndex()));
     NamedCommands.registerCommand("stopIndex", Commands.runOnce(() -> shooter.stopIndex()));
+    NamedCommands.registerCommand("stop", Commands.runOnce(() -> drivetrain.stop()));
   }
 
   private void configureAutoChooser() {
