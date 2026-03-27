@@ -11,6 +11,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.FieldConstants;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.subsystems.Intake;
@@ -111,6 +112,10 @@ public class RobotContainer {
         }))
         .onFalse(Commands.runOnce(() -> useAutoTurn = false));
 
+    driverController.b()
+        .onTrue(Commands.runOnce(() -> intake.intakeFuel()))
+        .onFalse(Commands.runOnce(() -> intake.stopWheels()));
+
     // Go to specified position
     driverController.povLeft()
         .onTrue(Commands.runOnce(() -> {
@@ -153,6 +158,8 @@ public class RobotContainer {
 
     driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armUp()));
 
+    driverController.rightBumper().onTrue(Commands.runOnce(() -> intake.armFullUp()));
+
     /* --------------------------- Copilot Controller --------------------------- */
 
     copilotController.povUp().onTrue(Commands.runOnce(() -> shooter.setLaunchAngle(55)));
@@ -190,12 +197,10 @@ public class RobotContainer {
    * as a deadband to the controller's joysticks
    */
   private void getDriveValues() {
-    if (driverController.rightBumper().getAsBoolean()) {
-      speedMult = 1;
-    } else if (driverController.leftBumper().getAsBoolean()) {
+    if (driverController.leftBumper().getAsBoolean()) {
       speedMult = 0.25;
     } else {
-      speedMult = 0.75;
+      speedMult = 1;
     }
 
     SmartDashboard.putNumber("Speed Mult", speedMult);
@@ -214,6 +219,11 @@ public class RobotContainer {
     NamedCommands.registerCommand("outIndex", Commands.runOnce(() -> shooter.outIndex()));
     NamedCommands.registerCommand("stopIndex", Commands.runOnce(() -> shooter.stopIndex()));
     NamedCommands.registerCommand("stop", Commands.runOnce(() -> drivetrain.stop()));
+    NamedCommands.registerCommand("inIntake", Commands.runOnce(() -> intake.intakeFuel()));
+    NamedCommands.registerCommand("outIntake", Commands.runOnce(() -> intake.outtakeFuel()));
+    NamedCommands.registerCommand("stopIntake", Commands.runOnce(() -> intake.stopWheels()));
+    NamedCommands.registerCommand("armUp", Commands.runOnce(() -> intake.armUp()));
+    NamedCommands.registerCommand("armMid", Commands.runOnce(() -> intake.armMid()));
   }
 
   private void configureAutoChooser() {

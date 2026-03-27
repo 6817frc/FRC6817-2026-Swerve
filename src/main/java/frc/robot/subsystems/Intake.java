@@ -48,12 +48,13 @@ public class Intake extends SubsystemBase {
   double intakeSpeed = 0.25;
 
   // wheel variables
-  double wheelVel = 0.75;
+  double wheelVel = 0.65;
 
   // Arm Positions
   double downPos = 0.345;
   double midPos = 0.52;
   double upPos = 0.6;
+  double fullUpPose = 0.67;
 
   /* Functions for wheel movements: */
 
@@ -73,6 +74,10 @@ public class Intake extends SubsystemBase {
   }
 
   /* Functions for various arm movements: */
+
+  public void armFullUp() {
+    intakeArmPID.setSetpoint(fullUpPose, ControlType.kPosition);
+  }
 
   // moves arm to the up position for intake
   public void armUp() {
