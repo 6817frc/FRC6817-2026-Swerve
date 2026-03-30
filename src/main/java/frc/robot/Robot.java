@@ -148,6 +148,8 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putNumber("Intake Arm", m_robotContainer.intake.getArmPosition());
 
+    SmartDashboard.putNumber("Output Current", m_robotContainer.shooter.m_shooterIndexer.getOutputCurrent());
+
     m_robotContainer.field.setRobotPose(m_robotContainer.drivetrain.getPose());
   }
 }

@@ -176,11 +176,11 @@ public class RobotContainer {
 
     copilotController.a() // Shoot at a set speed
         .whileTrue(Commands.run(() -> shooter.shoot()))
-        .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
+        .onFalse(Commands.runOnce(() -> shooter.idleShoot()));
 
     copilotController.b() // Change hood angle and launch height based on distance from hub
         .whileTrue(Commands.run(() -> shooter.shoot(drivetrain.getPose())))
-        .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
+        .onFalse(Commands.runOnce(() -> shooter.idleShoot()));
 
     copilotController.rightBumper()
         .onTrue(Commands.runOnce(() -> intake.intakeFuel()))
