@@ -113,7 +113,7 @@ public class Shooter extends SubsystemBase {
 
   //keep shooter moving so its easier to startup when needed
   public void idleShoot() {
-    shoot(0.10);
+    shoot(0.35);
   }
 
   /** launch fuel at a predifined speed */

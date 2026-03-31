@@ -126,7 +126,7 @@ public final class Constants {
 	}
 
 	public static final class AutoConstants {
-		public static final String[] AutoPaths = { "Shoot Left", "Shoot Straight", "Shoot Right" };
+		public static final String[] AutoPaths = { "Shoot Left", "Shoot Straight", "Shoot Right", "Turn" };
 
 		public static final double MAX_SPEED_METERS_PER_SECOND = 3.0;
 		public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
@@ -140,7 +140,7 @@ public final class Constants {
 		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_P = 5;
 		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_I = 0;
 
-		public static final double ROTATION_HOLONOMIC_CONTROLLER_P = 1;
+		public static final double ROTATION_HOLONOMIC_CONTROLLER_P = 1.25;
 		public static final double ROTATION_HOLONOMIC_CONTROLLER_I = 0;
 
 		// Constraint for the motion profiled robot angle controller
