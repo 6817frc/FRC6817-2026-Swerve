@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "armMid"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Shoot Straight Path"
@@ -26,6 +20,12 @@
           "type": "named",
           "data": {
             "name": "stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "armMid"
           }
         },
         {
