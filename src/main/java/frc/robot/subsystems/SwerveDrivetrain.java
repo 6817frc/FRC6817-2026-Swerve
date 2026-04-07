@@ -210,19 +210,19 @@ public class SwerveDrivetrain extends SubsystemBase {
 				this::getPose, // Robot pose supplier
 				this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
 				this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-				(chassisSpeeds) -> driveRobotRelative(chassisSpeeds), // Method that will drive the robot given ROBOT
+				(chassisSpeeds) -> setChassisSpeeds(chassisSpeeds), // Method that will drive the robot given ROBOT
 																		// RELATIVE ChassisSpeeds. Also optionally
 																		// outputs individual module feedforwards
 				new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for
 												// holonomic drive trains
 						new PIDConstants(Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_P,
-								Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_I, 0.0), // (SwerveModuleConstants.DRIVING_P,
+								Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_I, Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_D), // (SwerveModuleConstants.DRIVING_P,
 																									// SwerveModuleConstants.DRIVING_I,
 																									// SwerveModuleConstants.DRIVING_D),
 																									// // Translation
 																									// PID constants
 						new PIDConstants(Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_P,
-								Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_I, 0.0)// (SwerveModuleConstants.TURNING_P,
+								Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_I, Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_D)// (SwerveModuleConstants.TURNING_P,
 																								// SwerveModuleConstants.TURNING_I,
 																								// SwerveModuleConstants.TURNING_D)
 																								// // Rotation PID
@@ -245,6 +245,13 @@ public class SwerveDrivetrain extends SubsystemBase {
 		);
 
 		zeroHeading(); // resets gyro
+
+		// TODO kill test code
+		SmartDashboard.putBoolean("yep", false);
+		SmartDashboard.putNumber("Tp", 0);
+		SmartDashboard.putNumber("Td", 0);
+		SmartDashboard.putNumber("Rp", 0);
+		SmartDashboard.putNumber("Rd", 0);
 	}
 
 	@Override
@@ -264,6 +271,52 @@ public class SwerveDrivetrain extends SubsystemBase {
 		calculateTurnAngleUsingPidController();
 
 		publisher.set(getPose());
+
+		// TODO kill test code
+		if (SmartDashboard.getBoolean("yep", false)) {
+			SmartDashboard.putBoolean("yep", false);
+			AutoBuilder.configure(
+					this::getPose, // Robot pose supplier
+					this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+					this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+					(chassisSpeeds) -> setChassisSpeeds(chassisSpeeds), // Method that will drive the robot given
+																			// ROBOT
+																			// RELATIVE ChassisSpeeds. Also optionally
+																			// outputs individual module feedforwards
+					new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller
+													// for
+													// holonomic drive trains
+							new PIDConstants(SmartDashboard.getNumber("Tp", 0),
+									0, SmartDashboard.getNumber("Td", 0)), // (SwerveModuleConstants.DRIVING_P,
+																			// SwerveModuleConstants.DRIVING_I,
+																			// SwerveModuleConstants.DRIVING_D),
+																			// //
+																			// Translation
+																			// PID constants
+							new PIDConstants(SmartDashboard.getNumber("Rp", 0),
+									0, SmartDashboard.getNumber("Rd", 0))// (SwerveModuleConstants.TURNING_P,
+																			// SwerveModuleConstants.TURNING_I,
+																			// SwerveModuleConstants.TURNING_D)
+																			// // Rotation PID
+																			// constants
+					),
+					config, // The robot configuration
+					() -> {
+						// Boolean supplier that controls when the path will be mirrored for the red
+						// alliance
+						// This will flip the path being followed to the red side of the field.
+						// THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+						var alliance = DriverStation.getAlliance();
+						if (alliance.isPresent()) {
+							return alliance.get() == DriverStation.Alliance.Red;
+						}
+						return false;
+					},
+					this // Reference to this subsystem to set requirements
+			);
+
+		}
 	}
 
 	private void updateVisionMeasurement() {
@@ -539,8 +592,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 	 */
 	public void resetEncoders() {
 		m_frontLeft.resetEncoders();
-		m_rearLeft.resetEncoders();
 		m_frontRight.resetEncoders();
+		m_rearLeft.resetEncoders();
 		m_rearRight.resetEncoders();
 	}
 
@@ -549,8 +602,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 				// supplier for chassisSpeed, order of motors need to be the same as the
 				// consumer of ChassisSpeed
 				m_frontLeft.getState(),
-				m_rearLeft.getState(),
 				m_frontRight.getState(),
+				m_rearLeft.getState(),
 				m_rearRight.getState());
 	}
 

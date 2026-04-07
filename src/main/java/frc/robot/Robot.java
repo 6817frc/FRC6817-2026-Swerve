@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.util.PathPlannerLogging;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,6 +34,9 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
     SmartDashboard.putData("Swerve Odometry", m_robotContainer.field);
+    PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+      m_robotContainer.field.getObject("target pose").setPose(pose);
+    });
   }
 
   /**
@@ -59,6 +64,10 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
+    m_robotContainer.shooter.stopLaunch();
+    m_robotContainer.shooter.stopIndex();
+    m_robotContainer.intake.stopWheels();
+    m_robotContainer.intake.stopArm();
   }
 
   @Override

@@ -137,11 +137,13 @@ public final class Constants {
 		public static final double Y_CONTROLLER_P = 1;
 		public static final double THETA_CONTROLLER_P = 1;
 
-		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_P = 3.75;
+		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_P = 1;
 		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_I = 0;
+		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_D = 0;
 
-		public static final double ROTATION_HOLONOMIC_CONTROLLER_P = 0;
+		public static final double ROTATION_HOLONOMIC_CONTROLLER_P = 1;
 		public static final double ROTATION_HOLONOMIC_CONTROLLER_I = 0;
+		public static final double ROTATION_HOLONOMIC_CONTROLLER_D = 0;
 
 		// Constraint for the motion profiled robot angle controller
 		public static final TrapezoidProfile.Constraints THETA_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(
