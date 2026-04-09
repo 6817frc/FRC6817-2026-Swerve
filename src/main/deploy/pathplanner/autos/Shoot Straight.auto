@@ -19,12 +19,6 @@
         {
           "type": "named",
           "data": {
-            "name": "stop"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "armMid"
           }
         },

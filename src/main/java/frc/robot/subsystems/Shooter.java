@@ -87,7 +87,7 @@ public class Shooter extends SubsystemBase {
    */
   public void shootMeterPerSecond(double speed) {
     // 0.146725x-0.375426
-    shoot(0.14 * speed - 0.42); // Convert m/s into power
+    shoot(0.14 * speed - 0.425); // Convert m/s into power
   }
 
   /** launch fuel based on distance from hub */
