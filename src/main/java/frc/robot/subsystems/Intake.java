@@ -34,8 +34,7 @@ public class Intake extends SubsystemBase {
     m_intakeArm = new SparkMax(Ports.CAN.intakeArm, MotorType.kBrushless);
     SparkMaxConfig armConfig = new SparkMaxConfig();
     armConfig.inverted(false).idleMode(IdleMode.kBrake);
-    armConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .pid(2, 0.0, 0.0); //.maxOutput(0.15).minOutput(-0.15);
+    armConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder).pid(2, 0.0, 0.0);
     intakeArmPID = m_intakeArm.getClosedLoopController();
     armEncoder = m_intakeArm.getAbsoluteEncoder();
 

@@ -90,16 +90,16 @@ public class RobotContainer {
 
     /* --------------------------- Driver Controller --------------------------- */
 
-    driverController.x() // button:X - Set the pose based on tag
-        .onTrue(Commands.runOnce(() -> {
-          drivetrain.setPoseFromTag();
-          useAutoDrive = true;
-          useAutoTurn = true;
-        }))
-        .onFalse(Commands.runOnce(() -> {
-          useAutoDrive = false;
-          useAutoTurn = false;
-        }));
+    // driverController.x() // button:X - Set the pose based on tag
+    //     .onTrue(Commands.runOnce(() -> {
+    //       drivetrain.setPoseFromTag();
+    //       useAutoDrive = true;
+    //       useAutoTurn = true;
+    //     }))
+    //     .onFalse(Commands.runOnce(() -> {
+    //       useAutoDrive = false;
+    //       useAutoTurn = false;
+    //     }));
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
@@ -114,6 +114,10 @@ public class RobotContainer {
 
     driverController.b()
         .onTrue(Commands.runOnce(() -> intake.intakeFuel()))
+        .onFalse(Commands.runOnce(() -> intake.stopWheels()));
+    
+    driverController.x()
+        .onTrue(Commands.runOnce(() -> intake.outtakeFuel()))
         .onFalse(Commands.runOnce(() -> intake.stopWheels()));
 
     // Go to specified position

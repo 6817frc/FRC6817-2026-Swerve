@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "armUp"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Shoot Straight Path"
@@ -115,19 +121,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "outIndex"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.25
+                  "waitTime": 5.0
                 }
               }
             ]

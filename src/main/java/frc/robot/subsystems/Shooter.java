@@ -70,7 +70,7 @@ public class Shooter extends SubsystemBase {
   }
 
   /* Variables for the shooter functions */
-  double launchSpeed = 0.67;
+  double launchSpeed = 0.587;
   double launchPos = 0.75;
   double indexVel = 0.6;
   double slowIndexVel = 0.4;
