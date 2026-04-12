@@ -9,7 +9,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -46,10 +45,10 @@ public final class Constants {
 		public static final double ROTATIONAL_SLEW_RATE = 2.0; // percent per second (1 = 100%)
 
 		// Chassis configuration
-		public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(21.75);
+		public static final double TRACK_WIDTH_METERS = 0.56;
 
 		// Distance between centers of right and left wheels on robot
-		public static final double WHEEL_BASE_METERS = Units.inchesToMeters(21.75);
+		public static final double WHEEL_BASE_METERS = 0.56;
 
 		// Distance between front and back wheels on robot
 		public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(
@@ -127,7 +126,8 @@ public final class Constants {
 	}
 
 	public static final class AutoConstants {
-		public static final String[] AutoPaths = { "Test" };
+		public static final String[] AutoPaths = { "Shoot Left", "Shoot Straight", "Shoot Right", "Turn" , 
+		"Shoot Right (Middle)", "Shoot Left (Middle)"};
 
 		public static final double MAX_SPEED_METERS_PER_SECOND = 3.0;
 		public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
@@ -138,11 +138,13 @@ public final class Constants {
 		public static final double Y_CONTROLLER_P = 1;
 		public static final double THETA_CONTROLLER_P = 1;
 
-		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_P = 5;
+		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_P = 1;
 		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_I = 0;
+		public static final double TRANSLATION_HOLONOMIC_CONTROLLER_D = 0;
 
 		public static final double ROTATION_HOLONOMIC_CONTROLLER_P = 1;
 		public static final double ROTATION_HOLONOMIC_CONTROLLER_I = 0;
+		public static final double ROTATION_HOLONOMIC_CONTROLLER_D = 0;
 
 		// Constraint for the motion profiled robot angle controller
 		public static final TrapezoidProfile.Constraints THETA_CONTROLLER_CONSTRAINTS = new TrapezoidProfile.Constraints(

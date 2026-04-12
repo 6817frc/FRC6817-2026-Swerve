@@ -69,7 +69,7 @@ public class SwerveModule {
 				.outputRange(SwerveModuleConstants.DRIVING_MIN_OUTPUT_NORMALIZED,
 						SwerveModuleConstants.DRIVING_MAX_OUTPUT_NORMALIZED);
 
-		driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+		driveMotor.configure(driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
 		turnConfig
 				.inverted(true)
@@ -98,7 +98,7 @@ public class SwerveModule {
 				.positionWrappingEnabled(true)
 				.positionWrappingInputRange(SwerveModuleConstants.TURNING_ENCODER_POSITION_PID_MIN_INPUT_RADIANS,
 						SwerveModuleConstants.TURNING_ENCODER_POSITION_PID_MAX_INPUT_RADIANS);
-		turnMotor.configure(turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+		turnMotor.configure(turnConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 		desiredState.angle = new Rotation2d(turnEncoder.getPosition());
 		driveEncoder.setPosition(0);
 	}

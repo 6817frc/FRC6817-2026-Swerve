@@ -50,15 +50,15 @@ public class SwerveDrivetrain extends SubsystemBase {
 	// calibration: manually move wheels so it's facing straight then record the
 	// number below, deploy code then enable :)
 
-	public static final double FRONT_LEFT_VIRTUAL_OFFSET_RADIANS = -1.939; // adjust as needed so that virtual (turn)
+	public static final double FRONT_LEFT_VIRTUAL_OFFSET_RADIANS = -1.101; // adjust as needed so that virtual (turn)
 																			// position of wheel is zero when straight
-	public static final double REAR_LEFT_VIRTUAL_OFFSET_RADIANS = 1.661; // adjust as needed so that virtual (turn)
+	public static final double REAR_LEFT_VIRTUAL_OFFSET_RADIANS = -1.600; // adjust as needed so that virtual (turn)
 																			// position of wheel is zero when straight
 
-	public static final double FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS = -1.242; // invert right(+ or - pi) // adjust as
+	public static final double FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS = -1.379; // invert right(+ or - pi) // adjust as
 																			// needed so that virtual (turn) position of
 																			// wheel is zero when straight
-	public static final double REAR_RIGHT_VIRTUAL_OFFSET_RADIANS = -2.525; // invert right(+ or- pi) // adjust as needed
+	public static final double REAR_RIGHT_VIRTUAL_OFFSET_RADIANS = -2.149; // invert right(+ or- pi) // adjust as needed
 																			// so that virtual (turn) position of wheel
 																			// is zero when straight
 
@@ -210,19 +210,19 @@ public class SwerveDrivetrain extends SubsystemBase {
 				this::getPose, // Robot pose supplier
 				this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
 				this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-				(chassisSpeeds) -> driveRobotRelative(chassisSpeeds), // Method that will drive the robot given ROBOT
+				(chassisSpeeds) -> setChassisSpeeds(chassisSpeeds), // Method that will drive the robot given ROBOT
 																		// RELATIVE ChassisSpeeds. Also optionally
 																		// outputs individual module feedforwards
 				new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for
 												// holonomic drive trains
 						new PIDConstants(Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_P,
-								Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_I, 0.0), // (SwerveModuleConstants.DRIVING_P,
+								Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_I, Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_D), // (SwerveModuleConstants.DRIVING_P,
 																									// SwerveModuleConstants.DRIVING_I,
 																									// SwerveModuleConstants.DRIVING_D),
 																									// // Translation
 																									// PID constants
 						new PIDConstants(Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_P,
-								Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_I, 0.0)// (SwerveModuleConstants.TURNING_P,
+								Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_I, Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_D)// (SwerveModuleConstants.TURNING_P,
 																								// SwerveModuleConstants.TURNING_I,
 																								// SwerveModuleConstants.TURNING_D)
 																								// // Rotation PID
@@ -276,7 +276,7 @@ public class SwerveDrivetrain extends SubsystemBase {
 			if (mt1.rawFiducials[0].ambiguity > .7) {
 				doRejectUpdate = true;
 			}
-			if (mt1.rawFiducials[0].distToCamera > 2.5) {
+			if (mt1.rawFiducials[0].distToCamera > 5) {
 				doRejectUpdate = true;
 			}
 		}
@@ -471,24 +471,28 @@ public class SwerveDrivetrain extends SubsystemBase {
 			return;
 		int id = mt1.rawFiducials[0].id;
 		switch (id) {
-			case 7:
-				idealPose = new Pose2d(13.465, 1.638, Rotation2d.fromDegrees(-90));
-				// [13.46527421071163, 1.6380132212596628, -91.04776389939921]
-				break;
-			case 5:
-			case 8:
-				idealPose = new Pose2d(13.687, 2.104, Rotation2d.fromDegrees(-50));
-				// [13.687315108156406, 2.1035879231131234, -49.58318706509744]
-				break;
-			case 16:
-				idealPose = new Pose2d(16.016, 2.572, Rotation2d.fromDegrees(-100));
-				// Ideal pose: [16.016096044988895, 2.572107402482555, -100.88675058580691]
-				break;
+			// case 7:
+			// idealPose = new Pose2d(13.465, 1.638, Rotation2d.fromDegrees(-90));
+			// // [13.46527421071163, 1.6380132212596628, -91.04776389939921]
+			// break;
+			// case 5:
+			// case 8:
+			// idealPose = new Pose2d(13.687, 2.104, Rotation2d.fromDegrees(-50));
+			// // [13.687315108156406, 2.1035879231131234, -49.58318706509744]
+			// break;
+			// case 16:
+			// idealPose = new Pose2d(16.016, 2.572, Rotation2d.fromDegrees(-100));
+			// // Ideal pose: [16.016096044988895, 2.572107402482555, -100.88675058580691]
+			// break;
+			default:
+				idealPose = null;
 		}
 
-		xOffsetPID.setSetpoint(idealPose.getX());
-		yOffsetPID.setSetpoint(idealPose.getY());
-		turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
+		if (idealPose != null) {
+			xOffsetPID.setSetpoint(idealPose.getX());
+			yOffsetPID.setSetpoint(idealPose.getY());
+			turnOffsetPID.setSetpoint(idealPose.getRotation().getRadians());
+		}
 	}
 
 	public void setIdealPose(Pose2d pose, boolean flipForBlue) {
@@ -535,8 +539,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 	 */
 	public void resetEncoders() {
 		m_frontLeft.resetEncoders();
-		m_rearLeft.resetEncoders();
 		m_frontRight.resetEncoders();
+		m_rearLeft.resetEncoders();
 		m_rearRight.resetEncoders();
 	}
 
@@ -545,8 +549,8 @@ public class SwerveDrivetrain extends SubsystemBase {
 				// supplier for chassisSpeed, order of motors need to be the same as the
 				// consumer of ChassisSpeed
 				m_frontLeft.getState(),
-				m_rearLeft.getState(),
 				m_frontRight.getState(),
+				m_rearLeft.getState(),
 				m_rearRight.getState());
 	}
 

@@ -4,14 +4,18 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.util.PathPlannerLogging;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
+ * The methods in this class are called automatically corresponding to each
+ * mode, as described in
+ * the TimedRobot documentation. If you change the name of this class or the
+ * package after creating
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends TimedRobot {
@@ -20,42 +24,61 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   /**
-   * This function is run when the robot is first started up and should be used for any
+   * This function is run when the robot is first started up and should be used
+   * for any
    * initialization code.
    */
   public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our RobotContainer. This will perform all our button bindings,
+    // and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
     SmartDashboard.putData("Swerve Odometry", m_robotContainer.field);
+    PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+      m_robotContainer.field.getObject("target pose").setPose(pose);
+    });
   }
 
   /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+   * This function is called every 20 ms, no matter the mode. Use this for items
+   * like diagnostics
    * that you want ran during disabled, autonomous, teleoperated and test.
    *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
+   * <p>
+   * This runs after the mode specific periodic functions, but before LiveWindow
+   * and
    * SmartDashboard integrated updating.
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
+    // Runs the Scheduler. This is responsible for polling buttons, adding
+    // newly-scheduled
+    // commands, running already-scheduled commands, removing finished or
+    // interrupted commands,
+    // and running subsystem periodic() methods. This must be called from the
+    // robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_robotContainer.shooter.stopLaunch();
+    m_robotContainer.shooter.stopIndex();
+    m_robotContainer.intake.stopWheels();
+    m_robotContainer.intake.stopArm();
+  }
 
   @Override
   public void disabledPeriodic() {
     updateSmartDash();
   }
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  /**
+   * This autonomous runs the autonomous command selected by your
+   * {@link RobotContainer} class.
+   */
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -81,6 +104,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    m_robotContainer.shooter.setLaunchAngle(40);
   }
 
   /** This function is called periodically during operator control. */
@@ -97,29 +122,43 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+  }
 
   /*
-   * This is where all the information posted to Smart Dashboard will be, so any imput the drivers will need should be here
+   * This is where all the information posted to Smart Dashboard will be, so any
+   * imput the drivers will need should be here
    */
   public void updateSmartDash() {
-    SmartDashboard.putNumber("Front Left Turning Absolute Encoder Position", m_robotContainer.getDriveTrain().getFrontLeftModule().getTurningAbsoluteEncoder().getPosition());
-		SmartDashboard.putNumber("Rear Left Turning Absolute Encoder Position", m_robotContainer.getDriveTrain().getRearLeftModule().getTurningAbsoluteEncoder().getPosition());
-		SmartDashboard.putNumber("Front Right Turning Absolute Encoder Position", m_robotContainer.getDriveTrain().getFrontRightModule().getTurningAbsoluteEncoder().getPosition());
-		SmartDashboard.putNumber("Rear Right Turning Absolute Encoder Position", m_robotContainer.getDriveTrain().getRearRightModule().getTurningAbsoluteEncoder().getPosition());
-    
-    SmartDashboard.putNumber("IMU Yaw", m_robotContainer.getDriveTrain().getImu().getYaw());
-    SmartDashboard.putNumber("IMU Pitch", m_robotContainer.getDriveTrain().getImu().getPitch());
-    SmartDashboard.putNumber("IMU Roll", m_robotContainer.getDriveTrain().getImu().getRoll());
+    SmartDashboard.putNumber("Front Left Turning Absolute Encoder Position",
+        m_robotContainer.drivetrain.getFrontLeftModule().getTurningAbsoluteEncoder().getPosition());
+    SmartDashboard.putNumber("Rear Left Turning Absolute Encoder Position",
+        m_robotContainer.drivetrain.getRearLeftModule().getTurningAbsoluteEncoder().getPosition());
+    SmartDashboard.putNumber("Front Right Turning Absolute Encoder Position",
+        m_robotContainer.drivetrain.getFrontRightModule().getTurningAbsoluteEncoder().getPosition());
+    SmartDashboard.putNumber("Rear Right Turning Absolute Encoder Position",
+        m_robotContainer.drivetrain.getRearRightModule().getTurningAbsoluteEncoder().getPosition());
 
-    m_robotContainer.field.setRobotPose(m_robotContainer.getDriveTrain().getPose());
+    SmartDashboard.putNumber("IMU Yaw", m_robotContainer.drivetrain.getImu().getYaw());
+    SmartDashboard.putNumber("IMU Pitch", m_robotContainer.drivetrain.getImu().getPitch());
+    SmartDashboard.putNumber("IMU Roll", m_robotContainer.drivetrain.getImu().getRoll());
+
+    SmartDashboard.putNumber("Shooter Hood", m_robotContainer.shooter.tiltEncoder.getPosition());
+
+    SmartDashboard.putNumber("Intake Arm", m_robotContainer.intake.getArmPosition());
+
+    SmartDashboard.putNumber("Output Current", m_robotContainer.shooter.m_shooterIndexer.getOutputCurrent());
+
+    m_robotContainer.field.setRobotPose(m_robotContainer.drivetrain.getPose());
   }
 }
