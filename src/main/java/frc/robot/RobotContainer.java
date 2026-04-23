@@ -58,8 +58,8 @@ public class RobotContainer {
   private boolean useAutoTurn = false;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
-  private final CommandXboxController copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
+  private CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
+  private CommandXboxController copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
 
   private double leftStickX = 0;
   private double leftStickY = 0;
@@ -69,37 +69,38 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    configureDefaultCommands();
     // Configure the controller bindings
-    configureBindings();
+    configureMainBindings();
     // Add auto chooser to smartdashboard
     configureAutoChooser();
     // Configure commands for use in path planner
     configureAutoCommands();
-    SmartDashboard.putNumber("Launcher Speed", 0.7);
   }
 
-  private void configureBindings() {
+  private void configureDefaultCommands() {
     drivetrain.setDefaultCommand(new RunCommand(() -> {
       getDriveValues();
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive, useAutoTurn);
     }, drivetrain));
-    // shooter.setDefaultCommand(new RunCommand(() -> {
-    // shooter.moveHood(MathUtil.applyDeadband(copilotController.getLeftY(),
-    // JOYSTICK_AXIS_THRESHOLD));
-    // }, shooter));
+  }
+
+  public void configureMainBindings() {
+    driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
+    copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
 
     /* --------------------------- Driver Controller --------------------------- */
 
     // driverController.x() // button:X - Set the pose based on tag
-    //     .onTrue(Commands.runOnce(() -> {
-    //       drivetrain.setPoseFromTag();
-    //       useAutoDrive = true;
-    //       useAutoTurn = true;
-    //     }))
-    //     .onFalse(Commands.runOnce(() -> {
-    //       useAutoDrive = false;
-    //       useAutoTurn = false;
-    //     }));
+    // .onTrue(Commands.runOnce(() -> {
+    // drivetrain.setPoseFromTag();
+    // useAutoDrive = true;
+    // useAutoTurn = true;
+    // }))
+    // .onFalse(Commands.runOnce(() -> {
+    // useAutoDrive = false;
+    // useAutoTurn = false;
+    // }));
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
@@ -115,7 +116,7 @@ public class RobotContainer {
     driverController.b()
         .onTrue(Commands.runOnce(() -> intake.intakeFuel()))
         .onFalse(Commands.runOnce(() -> intake.stopWheels()));
-    
+
     driverController.x()
         .onTrue(Commands.runOnce(() -> intake.outtakeFuel()))
         .onFalse(Commands.runOnce(() -> intake.stopWheels()));
@@ -194,6 +195,18 @@ public class RobotContainer {
         .onTrue(Commands.runOnce(() -> intake.outtakeFuel()))
         .onFalse(Commands.runOnce(() -> intake.stopWheels()));
 
+  }
+
+  public void configureOutreachBindings() {
+    driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
+    copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
+
+    /* --------------------------- Driver Controller --------------------------- */
+
+
+
+    /* --------------------------- Copilot Controller --------------------------- */
+    
   }
 
   /**
