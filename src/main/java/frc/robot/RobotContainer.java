@@ -57,6 +57,9 @@ public class RobotContainer {
   private boolean useAutoDrive = false;
   private boolean useAutoTurn = false;
 
+  // Allow the copilot controller to move the robot, for use in outreach mode
+  private boolean useCopilot = false;
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
   private CommandXboxController copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
@@ -203,10 +206,38 @@ public class RobotContainer {
 
     /* --------------------------- Driver Controller --------------------------- */
 
+    driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
+    // Point at the hub and auto shoot
+    driverController.a()
+        .onTrue(Commands.runOnce(() -> useAutoTurn = true))
+        .whileTrue(Commands.run(() -> {
+          drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
+              Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()))));
+          shooter.shoot(drivetrain.getPose());
+        }))
+        .onFalse(Commands.runOnce(() -> {
+          useAutoTurn = false;
+          shooter.stopLaunch();
+        }));
+
+    driverController.x().onTrue(Commands.runOnce(() -> {
+      useCopilot = !useCopilot;
+    }));
+
+    // Right trigger pressed: down and intake in
+    // Right trigger release: mid pos and stop intake
+    driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armDown()));
+    driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armMid()));
+
+    // Left trigger: arm up
+    driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armUp()));
+
+    // Right bumper: arm all the way up
+    driverController.rightBumper().onTrue(Commands.runOnce(() -> intake.armFullUp()));
 
     /* --------------------------- Copilot Controller --------------------------- */
-    
+
   }
 
   /**
@@ -214,17 +245,33 @@ public class RobotContainer {
    * as a deadband to the controller's joysticks
    */
   private void getDriveValues() {
-    if (driverController.leftBumper().getAsBoolean()) {
-      speedMult = 0.25;
+    leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD);
+    leftStickY = MathUtil.applyDeadband(driverController.getLeftY(), JOYSTICK_AXIS_THRESHOLD);
+    rightStickX = MathUtil.applyDeadband(driverController.getRightX(), JOYSTICK_AXIS_THRESHOLD);
+
+    speedMult = 1;
+    if (useCopilot) {
+      if (Math.abs(leftStickX) > 0 || Math.abs(leftStickY) > 0 || Math.abs(rightStickX) > 0) {
+        // Automatically take control when the driver moves the sticks
+        speedMult *= driverController.leftBumper().getAsBoolean() ? 0.25 : 0.75;
+      } else {
+        // Allow the copilot controller to move the robot
+        leftStickX = MathUtil.applyDeadband(copilotController.getLeftX(), JOYSTICK_AXIS_THRESHOLD);
+        leftStickY = MathUtil.applyDeadband(copilotController.getLeftY(), JOYSTICK_AXIS_THRESHOLD);
+        rightStickX = MathUtil.applyDeadband(copilotController.getRightX(), JOYSTICK_AXIS_THRESHOLD);
+
+        speedMult *= 0.2;
+      }
     } else {
-      speedMult = 1;
+      speedMult *= driverController.leftBumper().getAsBoolean() ? 0.25 : 1;
     }
 
     SmartDashboard.putNumber("Speed Mult", speedMult);
 
-    leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
-    leftStickY = MathUtil.applyDeadband(driverController.getLeftY(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
-    rightStickX = MathUtil.applyDeadband(driverController.getRightX(), JOYSTICK_AXIS_THRESHOLD) * speedMult;
+    // Apply the speed multiplier
+    leftStickX = leftStickX * speedMult;
+    leftStickY = leftStickY * speedMult;
+    rightStickX = rightStickX * speedMult;
   }
 
   public void configureAutoCommands() {
