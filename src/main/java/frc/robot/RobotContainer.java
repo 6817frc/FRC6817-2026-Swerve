@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Debug;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -46,6 +47,7 @@ public class RobotContainer {
   public final Intake intake = new Intake();
   public final Shooter shooter = new Shooter();
   public final Climber climb = new Climber();
+  public final Debug debug = new Debug();
 
   public final Field2d field = new Field2d();
 
@@ -86,6 +88,18 @@ public class RobotContainer {
       getDriveValues();
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive, useAutoTurn);
     }, drivetrain));
+    debug.setDefaultCommand(new RunCommand(() -> {
+      switch (debug.checkControllerBindingsUpdate()) {
+        case NONE:
+          break;
+        case MAIN:
+          configureMainBindings();
+          break;
+        case OUTREACH:
+          configureOutreachBindings();
+          break;
+      }
+    }, debug));
   }
 
   public void configureMainBindings() {
