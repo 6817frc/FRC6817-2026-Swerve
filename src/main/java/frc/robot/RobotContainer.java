@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Debug;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
@@ -46,13 +48,14 @@ public class RobotContainer {
   public final Intake intake = new Intake();
   public final Shooter shooter = new Shooter();
   public final Climber climb = new Climber();
+  public final Debug debug = new Debug();
 
   public final Field2d field = new Field2d();
 
   public final SendableChooser<Integer> autoChooser = new SendableChooser<>();
 
   private double speedMult = 0.75;
-  private double triggerThreshold = 0.05;
+  private double triggerThreshold = 0.10;
 
   private boolean useAutoDrive = false;
   private boolean useAutoTurn = false;
@@ -61,8 +64,8 @@ public class RobotContainer {
   private boolean useCopilot = false;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
-  private CommandXboxController copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
+  private final CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
+  private final CommandXboxController copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
 
   private double leftStickX = 0;
   private double leftStickY = 0;
@@ -79,6 +82,7 @@ public class RobotContainer {
     configureAutoChooser();
     // Configure commands for use in path planner
     configureAutoCommands();
+    SmartDashboard.putNumber("Launcher Speed", 0.6);
   }
 
   private void configureDefaultCommands() {
@@ -86,11 +90,22 @@ public class RobotContainer {
       getDriveValues();
       drivetrain.drive(-leftStickX, leftStickY, -rightStickX, true, false, useAutoDrive, useAutoTurn);
     }, drivetrain));
+    debug.setDefaultCommand(new RunCommand(() -> {
+      switch (debug.checkControllerBindingsUpdate()) {
+        case NONE:
+          break;
+        case MAIN:
+          configureMainBindings();
+          break;
+        case OUTREACH:
+          configureOutreachBindings();
+          break;
+      }
+    }, debug));
   }
 
   public void configureMainBindings() {
-    driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
-    copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
+    CommandScheduler.getInstance().getActiveButtonLoop().clear();
 
     /* --------------------------- Driver Controller --------------------------- */
 
@@ -201,15 +216,18 @@ public class RobotContainer {
   }
 
   public void configureOutreachBindings() {
-    driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
-    copilotController = new CommandXboxController(Ports.USB.COPILOT_GAMEPAD);
+    CommandScheduler.getInstance().getActiveButtonLoop().clear();
 
     /* --------------------------- Driver Controller --------------------------- */
 
     driverController.y().onTrue(Commands.runOnce(() -> drivetrain.zeroHeading())); // button:Y - Reset field orientation
 
+    driverController.a() // Shoot at a set speed
+        .whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0.6))))
+        .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
+
     // Point at the hub and auto shoot
-    driverController.a()
+    driverController.b()
         .onTrue(Commands.runOnce(() -> useAutoTurn = true))
         .whileTrue(Commands.run(() -> {
           drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
@@ -224,6 +242,14 @@ public class RobotContainer {
     driverController.x().onTrue(Commands.runOnce(() -> {
       useCopilot = !useCopilot;
     }));
+
+    driverController.povUp()
+        .onTrue(Commands.runOnce(() -> shooter.inIndex()))
+        .onFalse(Commands.runOnce(() -> shooter.stopIndex()));
+
+    driverController.povDown()
+        .onTrue(Commands.runOnce(() -> shooter.outIndex()))
+        .onFalse(Commands.runOnce(() -> shooter.stopIndex()));
 
     // Right trigger pressed: down and intake in
     // Right trigger release: mid pos and stop intake
