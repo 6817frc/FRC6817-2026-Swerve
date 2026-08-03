@@ -111,6 +111,14 @@ public class Shooter extends SubsystemBase {
     shootMeterPerSecond(launchSpeed);
   }
 
+  public void outreachShoot(double angle, double velocity) {
+    double position = 0.024 * angle - 0.8;
+    position = Utils.clamp(position, 0.3, 0.75);
+    tiltPID.setSetpoint(position, ControlType.kPosition);
+
+    shoot(0.14 * velocity - 0.425); // Convert m/s into power
+  }
+
   // keep shooter moving so its easier to startup when needed
   public void idleShoot() {
     shoot(0.3);

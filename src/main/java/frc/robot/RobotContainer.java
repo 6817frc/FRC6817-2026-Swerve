@@ -9,6 +9,7 @@ import frc.robot.utils.Ports;
 import frc.robot.utils.Utils;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.OutreachTargetingConstants;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -20,7 +21,10 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Debug;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -55,13 +59,57 @@ public class RobotContainer {
   public final SendableChooser<Integer> autoChooser = new SendableChooser<>();
 
   private double speedMult = 0.75;
-  private double triggerThreshold = 0.10;
+  private double triggerThreshold = 0.05;
 
   private boolean useAutoDrive = false;
   private boolean useAutoTurn = false;
 
   // Allow the copilot controller to move the robot, for use in outreach mode
   private boolean useCopilot = false;
+
+  private boolean useOutreachTargetEditing = false;
+  private Pose3d outreachTarget = new Pose3d();
+  private double maxHeight = 2;
+
+  // Variables for the outreach target shooting calculations
+  /**
+   * The horizontal distance from the robot to the outreachTarget
+   */
+  private double outreachTargetDistance = 0.0;
+  /**
+   * The unclamped height at the target x without gravity
+   */
+  private double idealStraightLineHeight = 0.0;
+  /**
+   * The square of the unclamped height at the target x without gravity
+   */
+  private double idealStraightLineHeightSq = 0.0;
+  /**
+   * The unclamped inverse of the time to reach the straightLineHeight
+   *
+   * This number is then multiplied by a square distance to get a square velocity
+   */
+  private double idealInverseTimeSquared = 0.0;
+  /**
+   * The clamped height at the target x without gravity
+   */
+  private double straightLineHeight = 0.0;
+  /**
+   * The square of the clamped height at the target x without gravity
+   */
+  private double straightLineHeightSq = 0.0;
+  /**
+   * The clamped inverse of the time to reach the straightLineHeight
+   *
+   * This number is then multiplied by a square distance to get a square velocity
+   */
+  private double inverseTimeSquared = 0.0;
+  /**
+   * The slope of the unclamped launch angle
+   */
+  private double idealLaunchSlope = 0.0;
+  private double launchAngle = 0.0;
+  private double launchVelocity = 0.0;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driverController = new CommandXboxController(Ports.USB.DRIVER_GAMEPAD);
@@ -230,9 +278,9 @@ public class RobotContainer {
     driverController.b()
         .onTrue(Commands.runOnce(() -> useAutoTurn = true))
         .whileTrue(Commands.run(() -> {
-          drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
-              Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()))));
-          shooter.shoot(drivetrain.getPose());
+          drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(), outreachTarget.toPose2d()));
+          setShootValues(drivetrain.getPose(), outreachTarget.toPose2d());
+          shooter.outreachShoot(launchAngle, launchVelocity);
         }))
         .onFalse(Commands.runOnce(() -> {
           useAutoTurn = false;
@@ -241,6 +289,10 @@ public class RobotContainer {
 
     driverController.x().onTrue(Commands.runOnce(() -> {
       useCopilot = !useCopilot;
+    }));
+
+    driverController.start().onTrue(Commands.runOnce(() -> {
+      useOutreachTargetEditing = !useOutreachTargetEditing;
     }));
 
     driverController.povUp()
@@ -253,11 +305,17 @@ public class RobotContainer {
 
     // Right trigger pressed: down and intake in
     // Right trigger release: mid pos and stop intake
-    driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armDown()));
-    driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> intake.armMid()));
+    driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> {
+      if (!useOutreachTargetEditing) intake.armDown();
+    }));
+    driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> {
+      if (!useOutreachTargetEditing) intake.armMid();
+    }));
 
     // Left trigger: arm up
-    driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> intake.armUp()));
+    driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> {
+      if (!useOutreachTargetEditing) intake.armUp();
+    }));
 
     // Right bumper: arm all the way up
     driverController.rightBumper().onTrue(Commands.runOnce(() -> intake.armFullUp()));
@@ -274,6 +332,17 @@ public class RobotContainer {
     leftStickX = MathUtil.applyDeadband(driverController.getLeftX(), JOYSTICK_AXIS_THRESHOLD);
     leftStickY = MathUtil.applyDeadband(driverController.getLeftY(), JOYSTICK_AXIS_THRESHOLD);
     rightStickX = MathUtil.applyDeadband(driverController.getRightX(), JOYSTICK_AXIS_THRESHOLD);
+
+    if (useOutreachTargetEditing) {
+      leftTrigger = MathUtil.applyDeadband(driverController.getLeftTriggerAxis(), triggerThreshold);
+      rightTrigger = MathUtil.applyDeadband(driverController.getRightTriggerAxis(), triggerThreshold);
+      setOutreachTarget(leftStickX, leftStickY, rightStickX, rightTrigger - leftTrigger);
+
+      leftStickX = 0;
+      leftStickY = 0;
+      rightStickX = 0;
+      return;
+    }
 
     speedMult = 1;
     if (useCopilot) {
@@ -298,6 +367,40 @@ public class RobotContainer {
     leftStickX = leftStickX * speedMult;
     leftStickY = leftStickY * speedMult;
     rightStickX = rightStickX * speedMult;
+  }
+
+  public void setOutreachTarget(double leftStickX, double leftStickY, double rightStickY, double triggerDiff) {
+    outreachTarget = outreachTarget.plus(new Transform3d(leftStickX, leftStickY, rightStickX, new Rotation3d()));
+    maxHeight += triggerDiff;
+    idealStraightLineHeight = 2 * (maxHeight + Math.sqrt(maxHeight * (maxHeight - outreachTarget.getZ())));
+    idealStraightLineHeightSq = idealStraightLineHeight * idealStraightLineHeight;
+    idealInverseTimeSquared = OutreachTargetingConstants.halfGravity / (idealStraightLineHeight - outreachTarget.getZ());
+  }
+
+  public void setShootValues(Pose2d botPose, Pose2d targetPose) {
+    outreachTargetDistance = botPose.getTranslation().getDistance(targetPose.getTranslation());
+    idealLaunchSlope = idealStraightLineHeight / outreachTargetDistance;
+    if (idealLaunchSlope <= OutreachTargetingConstants.minSlope) {
+      // Recalculate inverseTimeSquared and straightLineHeight
+      straightLineHeight = T.x * OutreachTargetingConstants.minSlope;
+      straightLineHeightSq = straightLineHeight * straightLineHeight;
+      inverseTimeSquared = OutreachTargetingConstants.halfGravity / (straightLineHeight - outreachTarget.getZ());
+
+      launchAngle = OutreachTargetingConstants.minAngle;
+      launchVelocity = Math.sqrt(inverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + straightLineHeightSq));
+    } else if (idealLaunchSlope < OutreachTargetingConstants.maxSlope) {
+      launchAngle = Math.atan(idealLaunchSlope);
+      // straightLineHeight is equivalent to the idealStraightLineHeight, so all the ideal values work
+      launchVelocity = Math.sqrt(idealInverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + idealStraightLineHeightSq));
+    } else {
+      // Recalculate inverseTimeSquared and straightLineHeight
+      straightLineHeight = T.x * OutreachTargetingConstants.maxSlope;
+      straightLineHeightSq = straightLineHeight * straightLineHeight;
+      inverseTimeSquared = OutreachTargetingConstants.halfGravity / (straightLineHeight - outreachTarget.getZ());
+
+      launchAngle = OutreachTargetingConstants.maxAngle;
+      launchVelocity = Math.sqrt(inverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + straightLineHeightSq));
+    }
   }
 
   public void configureAutoCommands() {

@@ -156,4 +156,13 @@ public final class Constants {
 			NONE, MAIN, OUTREACH
 		}
 	}
+
+	public static final class OutreachTargetingConstants {
+		public static final double gravity = 9.8;
+		public static final double halfGravity = gravity / 2;
+		public static final double minAngle = 45;
+		public static final double maxAngle = 65;
+		public static final double minSlope = Math.tan(minAngle);
+		public static final double maxSlope = Math.tan(maxAngle);
+	}
 }
