@@ -69,7 +69,7 @@ public class RobotContainer {
 
   private boolean useOutreachTargetEditing = false;
   private Pose3d outreachTarget = new Pose3d();
-  private double maxHeight = 2;
+  private double maxHeight = 1.5;
 
   // Variables for the outreach target shooting calculations
   /**
@@ -295,6 +295,8 @@ public class RobotContainer {
       useOutreachTargetEditing = !useOutreachTargetEditing;
     }));
 
+    driverController.back().onTrue(Commands.runOnce(() -> setOutreachTarget(new Pose3d(drivetrain.getPose()), 0)));
+
     driverController.povUp()
         .onTrue(Commands.runOnce(() -> shooter.inIndex()))
         .onFalse(Commands.runOnce(() -> shooter.stopIndex()));
@@ -306,15 +308,18 @@ public class RobotContainer {
     // Right trigger pressed: down and intake in
     // Right trigger release: mid pos and stop intake
     driverController.rightTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> {
-      if (!useOutreachTargetEditing) intake.armDown();
+      if (!useOutreachTargetEditing)
+        intake.armDown();
     }));
     driverController.rightTrigger(triggerThreshold).onFalse(Commands.runOnce(() -> {
-      if (!useOutreachTargetEditing) intake.armMid();
+      if (!useOutreachTargetEditing)
+        intake.armMid();
     }));
 
     // Left trigger: arm up
     driverController.leftTrigger(triggerThreshold).onTrue(Commands.runOnce(() -> {
-      if (!useOutreachTargetEditing) intake.armUp();
+      if (!useOutreachTargetEditing)
+        intake.armUp();
     }));
 
     // Right bumper: arm all the way up
@@ -334,9 +339,10 @@ public class RobotContainer {
     rightStickX = MathUtil.applyDeadband(driverController.getRightX(), JOYSTICK_AXIS_THRESHOLD);
 
     if (useOutreachTargetEditing) {
-      leftTrigger = MathUtil.applyDeadband(driverController.getLeftTriggerAxis(), triggerThreshold);
-      rightTrigger = MathUtil.applyDeadband(driverController.getRightTriggerAxis(), triggerThreshold);
-      setOutreachTarget(leftStickX, leftStickY, rightStickX, rightTrigger - leftTrigger);
+      double rightStickY = MathUtil.applyDeadband(driverController.getRightY(), JOYSTICK_AXIS_THRESHOLD);
+      double leftTrigger = MathUtil.applyDeadband(driverController.getLeftTriggerAxis(), triggerThreshold);
+      double rightTrigger = MathUtil.applyDeadband(driverController.getRightTriggerAxis(), triggerThreshold);
+      setOutreachTarget(leftStickX, leftStickY, rightStickY, rightTrigger - leftTrigger);
 
       leftStickX = 0;
       leftStickY = 0;
@@ -370,11 +376,25 @@ public class RobotContainer {
   }
 
   public void setOutreachTarget(double leftStickX, double leftStickY, double rightStickY, double triggerDiff) {
-    outreachTarget = outreachTarget.plus(new Transform3d(leftStickX, leftStickY, rightStickX, new Rotation3d()));
-    maxHeight += triggerDiff;
+    setOutreachTarget(outreachTarget.plus(new Transform3d(
+        leftStickX * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
+        leftStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
+        rightStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
+        new Rotation3d())),
+        triggerDiff * OutreachTargetingConstants.TRIGGER_MULTIPLIER);
+  }
+
+  public void setOutreachTarget(Pose3d targetPose, double heightDelta) {
+    outreachTarget = targetPose;
+    maxHeight += heightDelta;
+
     idealStraightLineHeight = 2 * (maxHeight + Math.sqrt(maxHeight * (maxHeight - outreachTarget.getZ())));
     idealStraightLineHeightSq = idealStraightLineHeight * idealStraightLineHeight;
-    idealInverseTimeSquared = OutreachTargetingConstants.halfGravity / (idealStraightLineHeight - outreachTarget.getZ());
+    idealInverseTimeSquared = OutreachTargetingConstants.halfGravity
+        / (idealStraightLineHeight - outreachTarget.getZ());
+
+    SmartDashboard.putString("Outreach Target", outreachTarget.toString());
+    SmartDashboard.putNumber("Max Height", maxHeight);
   }
 
   public void setShootValues(Pose2d botPose, Pose2d targetPose) {
@@ -382,25 +402,37 @@ public class RobotContainer {
     idealLaunchSlope = idealStraightLineHeight / outreachTargetDistance;
     if (idealLaunchSlope <= OutreachTargetingConstants.minSlope) {
       // Recalculate inverseTimeSquared and straightLineHeight
-      straightLineHeight = T.x * OutreachTargetingConstants.minSlope;
+      straightLineHeight = outreachTargetDistance * OutreachTargetingConstants.minSlope;
       straightLineHeightSq = straightLineHeight * straightLineHeight;
       inverseTimeSquared = OutreachTargetingConstants.halfGravity / (straightLineHeight - outreachTarget.getZ());
 
       launchAngle = OutreachTargetingConstants.minAngle;
-      launchVelocity = Math.sqrt(inverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + straightLineHeightSq));
+      launchVelocity = Math
+          .sqrt(inverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + straightLineHeightSq));
+      SmartDashboard.putNumberArray("min values", new double[] { outreachTargetDistance, idealLaunchSlope,
+          straightLineHeight, straightLineHeightSq, inverseTimeSquared });
     } else if (idealLaunchSlope < OutreachTargetingConstants.maxSlope) {
-      launchAngle = Math.atan(idealLaunchSlope);
-      // straightLineHeight is equivalent to the idealStraightLineHeight, so all the ideal values work
-      launchVelocity = Math.sqrt(idealInverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + idealStraightLineHeightSq));
+      launchAngle = Math.toDegrees(Math.atan(idealLaunchSlope));
+      // straightLineHeight is equivalent to the idealStraightLineHeight, so all the
+      // ideal values work
+      launchVelocity = Math.sqrt(
+          idealInverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + idealStraightLineHeightSq));
+      SmartDashboard.putNumberArray("mid values", new double[] { outreachTargetDistance, idealLaunchSlope,
+          idealStraightLineHeight, idealStraightLineHeightSq, idealInverseTimeSquared });
     } else {
       // Recalculate inverseTimeSquared and straightLineHeight
-      straightLineHeight = T.x * OutreachTargetingConstants.maxSlope;
+      straightLineHeight = outreachTargetDistance * OutreachTargetingConstants.maxSlope;
       straightLineHeightSq = straightLineHeight * straightLineHeight;
       inverseTimeSquared = OutreachTargetingConstants.halfGravity / (straightLineHeight - outreachTarget.getZ());
 
       launchAngle = OutreachTargetingConstants.maxAngle;
-      launchVelocity = Math.sqrt(inverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + straightLineHeightSq));
+      launchVelocity = Math
+          .sqrt(inverseTimeSquared * (outreachTargetDistance * outreachTargetDistance + straightLineHeightSq));
+      SmartDashboard.putNumberArray("max values", new double[] { outreachTargetDistance, idealLaunchSlope,
+          straightLineHeight, straightLineHeightSq, inverseTimeSquared });
     }
+    SmartDashboard.putNumber("Outreach Launch Angle", launchAngle);
+    SmartDashboard.putNumber("Outreach Launch Velocity", launchVelocity);
   }
 
   public void configureAutoCommands() {

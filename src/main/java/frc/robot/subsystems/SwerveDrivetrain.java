@@ -50,15 +50,15 @@ public class SwerveDrivetrain extends SubsystemBase {
 	// calibration: manually move wheels so it's facing straight then record the
 	// number below, deploy code then enable :)
 
-	public static final double FRONT_LEFT_VIRTUAL_OFFSET_RADIANS = -1.101; // adjust as needed so that virtual (turn)
+	public static final double FRONT_LEFT_VIRTUAL_OFFSET_RADIANS = -1.077; // adjust as needed so that virtual (turn)
 																			// position of wheel is zero when straight
-	public static final double REAR_LEFT_VIRTUAL_OFFSET_RADIANS = -1.600; // adjust as needed so that virtual (turn)
+	public static final double REAR_LEFT_VIRTUAL_OFFSET_RADIANS = -1.599; // adjust as needed so that virtual (turn)
 																			// position of wheel is zero when straight
 
-	public static final double FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS = -1.379; // invert right(+ or - pi) // adjust as
+	public static final double FRONT_RIGHT_VIRTUAL_OFFSET_RADIANS = -1.398; // invert right(+ or - pi) // adjust as
 																			// needed so that virtual (turn) position of
 																			// wheel is zero when straight
-	public static final double REAR_RIGHT_VIRTUAL_OFFSET_RADIANS = -2.149; // invert right(+ or- pi) // adjust as needed
+	public static final double REAR_RIGHT_VIRTUAL_OFFSET_RADIANS = -2.179; // invert right(+ or- pi) // adjust as needed
 																			// so that virtual (turn) position of wheel
 																			// is zero when straight
 
@@ -211,22 +211,24 @@ public class SwerveDrivetrain extends SubsystemBase {
 				this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
 				this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
 				(chassisSpeeds) -> setChassisSpeeds(chassisSpeeds), // Method that will drive the robot given ROBOT
-																		// RELATIVE ChassisSpeeds. Also optionally
-																		// outputs individual module feedforwards
+																	// RELATIVE ChassisSpeeds. Also optionally
+																	// outputs individual module feedforwards
 				new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for
 												// holonomic drive trains
 						new PIDConstants(Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_P,
-								Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_I, Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_D), // (SwerveModuleConstants.DRIVING_P,
-																									// SwerveModuleConstants.DRIVING_I,
-																									// SwerveModuleConstants.DRIVING_D),
-																									// // Translation
-																									// PID constants
+								Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_I,
+								Constants.AutoConstants.TRANSLATION_HOLONOMIC_CONTROLLER_D), // (SwerveModuleConstants.DRIVING_P,
+						// SwerveModuleConstants.DRIVING_I,
+						// SwerveModuleConstants.DRIVING_D),
+						// // Translation
+						// PID constants
 						new PIDConstants(Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_P,
-								Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_I, Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_D)// (SwerveModuleConstants.TURNING_P,
-																								// SwerveModuleConstants.TURNING_I,
-																								// SwerveModuleConstants.TURNING_D)
-																								// // Rotation PID
-																								// constants
+								Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_I,
+								Constants.AutoConstants.ROTATION_HOLONOMIC_CONTROLLER_D)// (SwerveModuleConstants.TURNING_P,
+				// SwerveModuleConstants.TURNING_I,
+				// SwerveModuleConstants.TURNING_D)
+				// // Rotation PID
+				// constants
 				),
 				config, // The robot configuration
 				() -> {

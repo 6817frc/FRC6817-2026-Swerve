@@ -116,7 +116,7 @@ public class Shooter extends SubsystemBase {
     position = Utils.clamp(position, 0.3, 0.75);
     tiltPID.setSetpoint(position, ControlType.kPosition);
 
-    shoot(0.14 * velocity - 0.425); // Convert m/s into power
+    shoot(0.076 * velocity + 0.047); // Convert m/s into power
   }
 
   // keep shooter moving so its easier to startup when needed
