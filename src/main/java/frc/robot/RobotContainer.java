@@ -376,10 +376,11 @@ public class RobotContainer {
   }
 
   public void setOutreachTarget(double leftStickX, double leftStickY, double rightStickY, double triggerDiff) {
+    // ChassisSpeeds.fromRobotRelativeSpeeds(x, y, 0, 0)
     setOutreachTarget(outreachTarget.plus(new Transform3d(
+        -leftStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
         leftStickX * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
-        leftStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
-        rightStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
+        -rightStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
         new Rotation3d())),
         triggerDiff * OutreachTargetingConstants.TRIGGER_MULTIPLIER);
   }
