@@ -24,7 +24,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -69,9 +68,13 @@ public class RobotContainer {
 
   private boolean useOutreachTargetEditing = false;
   private Pose3d outreachTarget = new Pose3d();
-  private double maxHeight = 1.5;
+  private double idealMaxHeight = 1.5;
 
   // Variables for the outreach target shooting calculations
+  /**
+   * The min of the max height and target height
+   */
+  private double calculatedMaxHeight = 1.5;
   /**
    * The horizontal distance from the robot to the outreachTarget
    */
@@ -265,6 +268,7 @@ public class RobotContainer {
 
   public void configureOutreachBindings() {
     CommandScheduler.getInstance().getActiveButtonLoop().clear();
+    setOutreachTarget(outreachTarget, 0);
 
     /* --------------------------- Driver Controller --------------------------- */
 
@@ -342,7 +346,11 @@ public class RobotContainer {
       double rightStickY = MathUtil.applyDeadband(driverController.getRightY(), JOYSTICK_AXIS_THRESHOLD);
       double leftTrigger = MathUtil.applyDeadband(driverController.getLeftTriggerAxis(), triggerThreshold);
       double rightTrigger = MathUtil.applyDeadband(driverController.getRightTriggerAxis(), triggerThreshold);
-      setOutreachTarget(leftStickX, leftStickY, rightStickY, rightTrigger - leftTrigger);
+      setOutreachTarget(
+          -leftStickX * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
+          leftStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
+          -rightStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
+          (rightTrigger - leftTrigger) * OutreachTargetingConstants.TRIGGER_MULTIPLIER);
 
       leftStickX = 0;
       leftStickY = 0;
@@ -375,27 +383,26 @@ public class RobotContainer {
     rightStickX = rightStickX * speedMult;
   }
 
-  public void setOutreachTarget(double leftStickX, double leftStickY, double rightStickY, double triggerDiff) {
-    // ChassisSpeeds.fromRobotRelativeSpeeds(x, y, 0, 0)
-    setOutreachTarget(outreachTarget.plus(new Transform3d(
-        -leftStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
-        leftStickX * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
-        -rightStickY * OutreachTargetingConstants.JOYSTICK_MULTIPLIER,
-        new Rotation3d())),
-        triggerDiff * OutreachTargetingConstants.TRIGGER_MULTIPLIER);
+  public void setOutreachTarget(double xDelta, double yDelta, double zDelta, double heightDelta) {
+    setOutreachTarget(new Pose3d(outreachTarget.getX() + xDelta, outreachTarget.getY() + yDelta,
+        outreachTarget.getZ() + zDelta, new Rotation3d()), heightDelta);
   }
 
   public void setOutreachTarget(Pose3d targetPose, double heightDelta) {
     outreachTarget = targetPose;
-    maxHeight += heightDelta;
+    idealMaxHeight += heightDelta;
 
-    idealStraightLineHeight = 2 * (maxHeight + Math.sqrt(maxHeight * (maxHeight - outreachTarget.getZ())));
+    calculatedMaxHeight = Math.max(idealMaxHeight, targetPose.getZ());
+
+    idealStraightLineHeight = 2
+        * (calculatedMaxHeight + Math.sqrt(calculatedMaxHeight * (calculatedMaxHeight - outreachTarget.getZ())));
     idealStraightLineHeightSq = idealStraightLineHeight * idealStraightLineHeight;
     idealInverseTimeSquared = OutreachTargetingConstants.halfGravity
         / (idealStraightLineHeight - outreachTarget.getZ());
 
     SmartDashboard.putString("Outreach Target", outreachTarget.toString());
-    SmartDashboard.putNumber("Max Height", maxHeight);
+    SmartDashboard.putNumber("Max Height", calculatedMaxHeight);
+    field.getObject("Outreach Target").setPose(outreachTarget.toPose2d());
   }
 
   public void setShootValues(Pose2d botPose, Pose2d targetPose) {
