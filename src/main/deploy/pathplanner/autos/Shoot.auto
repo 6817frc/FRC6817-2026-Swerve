@@ -25,6 +25,12 @@
         {
           "type": "named",
           "data": {
+            "name": "armMid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "autoShoot"
           }
         },
@@ -41,19 +47,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "outIndex"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.25
+                  "waitTime": 3.0
                 }
               }
             ]
@@ -62,13 +56,19 @@
         {
           "type": "named",
           "data": {
-            "name": "armUp"
+            "name": "armFullUp"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "inIntake"
+            "name": "armUp"
           }
         },
         {
@@ -84,19 +84,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "outIndex"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.25
+                  "waitTime": 3.5
                 }
               }
             ]

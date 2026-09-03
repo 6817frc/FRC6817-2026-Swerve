@@ -455,6 +455,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("inIntake", Commands.runOnce(() -> intake.intakeFuel()));
     NamedCommands.registerCommand("outIntake", Commands.runOnce(() -> intake.outtakeFuel()));
     NamedCommands.registerCommand("stopIntake", Commands.runOnce(() -> intake.stopWheels()));
+    NamedCommands.registerCommand("armFullUp", Commands.runOnce(() -> intake.armFullUp()));
     NamedCommands.registerCommand("armUp", Commands.runOnce(() -> intake.armUp()));
     NamedCommands.registerCommand("armMid", Commands.runOnce(() -> intake.armMid()));
   }
