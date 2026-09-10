@@ -444,15 +444,6 @@ public class RobotContainer {
   }
 
   public void configureAutoCommands() {
-    NamedCommands.registerCommand("pointTowardHub", Commands.runOnce(() -> {
-      drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
-          Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()))));
-      useAutoTurn = true;
-    }));
-    NamedCommands.registerCommand("stopAutoMove", Commands.runOnce(() -> {
-      useAutoDrive = false;
-      useAutoTurn = true;
-    }));
     NamedCommands.registerCommand("stop", Commands.runOnce(() -> drivetrain.stop()));
     NamedCommands.registerCommand("moveHoodToLaunchPos", Commands.runOnce(() -> shooter.moveToLaunchPos()));
     NamedCommands.registerCommand("shoot", Commands.runOnce(() -> shooter.shoot()));
