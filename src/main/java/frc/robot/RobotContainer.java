@@ -444,7 +444,7 @@ public class RobotContainer {
   }
 
   public void configureAutoCommands() {
-    NamedCommands.registerCommand("pointTowardHub", Commands.run(() -> {
+    NamedCommands.registerCommand("pointTowardHub", Commands.runOnce(() -> {
       drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
           Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()))));
       useAutoTurn = true;

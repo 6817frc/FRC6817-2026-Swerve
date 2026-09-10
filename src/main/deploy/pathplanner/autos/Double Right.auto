@@ -102,6 +102,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "End Right Trench"
+          }
+        },
+        {
           "type": "sequential",
           "data": {
             "commands": [
