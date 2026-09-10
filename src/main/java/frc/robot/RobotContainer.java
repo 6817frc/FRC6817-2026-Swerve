@@ -444,6 +444,16 @@ public class RobotContainer {
   }
 
   public void configureAutoCommands() {
+    NamedCommands.registerCommand("pointTowardHub", Commands.run(() -> {
+      drivetrain.setIdealRotation(Utils.directionToPose(drivetrain.getPose(),
+          Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()))));
+      useAutoTurn = true;
+    }));
+    NamedCommands.registerCommand("stopAutoMove", Commands.runOnce(() -> {
+      useAutoDrive = false;
+      useAutoTurn = true;
+    }));
+    NamedCommands.registerCommand("stop", Commands.runOnce(() -> drivetrain.stop()));
     NamedCommands.registerCommand("moveHoodToLaunchPos", Commands.runOnce(() -> shooter.moveToLaunchPos()));
     NamedCommands.registerCommand("shoot", Commands.runOnce(() -> shooter.shoot()));
     NamedCommands.registerCommand("stopShoot", Commands.runOnce(() -> shooter.stopLaunch()));
@@ -451,13 +461,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("inIndex", Commands.runOnce(() -> shooter.inIndex()));
     NamedCommands.registerCommand("outIndex", Commands.runOnce(() -> shooter.outIndex()));
     NamedCommands.registerCommand("stopIndex", Commands.runOnce(() -> shooter.stopIndex()));
-    NamedCommands.registerCommand("stop", Commands.runOnce(() -> drivetrain.stop()));
     NamedCommands.registerCommand("inIntake", Commands.runOnce(() -> intake.intakeFuel()));
     NamedCommands.registerCommand("outIntake", Commands.runOnce(() -> intake.outtakeFuel()));
     NamedCommands.registerCommand("stopIntake", Commands.runOnce(() -> intake.stopWheels()));
     NamedCommands.registerCommand("armFullUp", Commands.runOnce(() -> intake.armFullUp()));
     NamedCommands.registerCommand("armUp", Commands.runOnce(() -> intake.armUp()));
     NamedCommands.registerCommand("armMid", Commands.runOnce(() -> intake.armMid()));
+    NamedCommands.registerCommand("armDown", Commands.runOnce(() -> intake.armDown()));
   }
 
   private void configureAutoChooser() {
