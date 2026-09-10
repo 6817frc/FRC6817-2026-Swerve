@@ -17,7 +17,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Debug;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -50,7 +49,6 @@ public class RobotContainer {
   public final SwerveDrivetrain drivetrain = new SwerveDrivetrain();
   public final Intake intake = new Intake();
   public final Shooter shooter = new Shooter();
-  public final Climber climb = new Climber();
   public final Debug debug = new Debug();
 
   public final Field2d field = new Field2d();
