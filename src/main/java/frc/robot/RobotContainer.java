@@ -266,7 +266,7 @@ public class RobotContainer {
 
   public void configureOutreachBindings() {
     CommandScheduler.getInstance().getActiveButtonLoop().clear();
-    setOutreachTarget(outreachTarget, 0);
+    setOutreachtarget(outreachTarget);
 
     /* --------------------------- Driver Controller --------------------------- */
 
@@ -276,7 +276,7 @@ public class RobotContainer {
         .whileTrue(Commands.run(() -> shooter.shoot(SmartDashboard.getNumber("Launcher Speed", 0.6))))
         .onFalse(Commands.runOnce(() -> shooter.stopLaunch()));
 
-    // Point at the hub and auto shoot
+    // Point at the outreach target and auto shoot
     driverController.b()
         .onTrue(Commands.runOnce(() -> useAutoTurn = true))
         .whileTrue(Commands.run(() -> {
@@ -289,6 +289,22 @@ public class RobotContainer {
           shooter.stopLaunch();
         }));
 
+    driverController.b().and(driverController.povLeft())
+        .onTrue(Commands.runOnce(() -> {
+          // set outreachTarget
+          Pose2d targetHub2d = Utils.redToAllianceSpecific(new Pose2d(FieldConstants.RED_HUB, new Rotation2d()));
+          Pose3d targetHub3d = new Pose3d(targetHub2d.getX(), targetHub2d.getY(), 1.5, new Rotation3d());
+          setOutreachTarget(targetHub3d, 1.7);
+
+          // set ideal pose for shooting without hitting the ceiling
+          // [13.96745707840551, 2.8276569167798535, 151.52189908061618]
+          drivetrain.setIdealPose(new Pose2d(14, 2.83, new Rotation2d()), true);
+          useAutoDrive = true;
+        }))
+        .onFalse(Commands.runOnce(() -> {
+          useAutoDrive = false;
+        }));
+
     driverController.x().onTrue(Commands.runOnce(() -> {
       useCopilot = !useCopilot;
     }));
@@ -297,7 +313,7 @@ public class RobotContainer {
       useOutreachTargetEditing = !useOutreachTargetEditing;
     }));
 
-    driverController.back().onTrue(Commands.runOnce(() -> setOutreachTarget(new Pose3d(drivetrain.getPose()), 0)));
+    driverController.back().onTrue(Commands.runOnce(() -> setOutreachtarget(new Pose3d(drivetrain.getPose()))));
 
     driverController.povUp()
         .onTrue(Commands.runOnce(() -> shooter.inIndex()))
@@ -383,12 +399,16 @@ public class RobotContainer {
 
   public void setOutreachTarget(double xDelta, double yDelta, double zDelta, double heightDelta) {
     setOutreachTarget(new Pose3d(outreachTarget.getX() + xDelta, outreachTarget.getY() + yDelta,
-        outreachTarget.getZ() + zDelta, new Rotation3d()), heightDelta);
+        outreachTarget.getZ() + zDelta, new Rotation3d()), idealMaxHeight + heightDelta);
   }
 
-  public void setOutreachTarget(Pose3d targetPose, double heightDelta) {
+  public void setOutreachtarget(Pose3d targetPose) {
+    setOutreachTarget(targetPose, idealMaxHeight);
+  }
+
+  public void setOutreachTarget(Pose3d targetPose, double targetMaxHeight) {
     outreachTarget = targetPose;
-    idealMaxHeight += heightDelta;
+    idealMaxHeight = targetMaxHeight;
 
     calculatedMaxHeight = Math.max(idealMaxHeight, targetPose.getZ());
 
